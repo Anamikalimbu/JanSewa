@@ -7,6 +7,7 @@
  */
 
 import { createContext, useContext, useState } from "react";
+import api from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -15,7 +16,26 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
 
   const login = async (credentials) => {
-    console.log("Login — Week 3", credentials);
+    const { data } = await api.post("/auth/login", credentials);
+    const { user: loggedInUser, token: authToken } = data.data || data;
+    setUser(loggedInUser);
+    setToken(authToken);
+    if (authToken) localStorage.setItem("token", authToken);
+    return loggedInUser;
+  };
+
+  const register = async (payload) => {
+    const { data } = await api.post("/auth/register", payload);
+    const { user: newUser, token: authToken } = data.data || data;
+    setUser(newUser);
+    setToken(authToken);
+    if (authToken) localStorage.setItem("token", authToken);
+    return newUser;
+  };
+
+  const forgotPassword = async (email) => {
+    const { data } = await api.post("/auth/forgot-password", { email });
+    return data;
   };
 
   const logout = () => {
@@ -25,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, register, forgotPassword, logout }}>
       {children}
     </AuthContext.Provider>
   );
