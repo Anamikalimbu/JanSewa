@@ -123,7 +123,7 @@ const values = [
 
 const team = [
   { initials: "AL", name: "Anamika Limbu",  role: "Full-Stack Developer",         bg: "rgba(0,128,128,0.12)", color: "#006666" },
-  { initials: "DB", name: "Divya Bhandari", role: "Full-Stack Developer & Project Lead", bg: "rgba(255,193,7,0.15)", color: "#a07000" },
+  { initials: "DB", name: "Divya Bhandari", role: "Full-Stack Developer", bg: "rgba(255,193,7,0.15)", color: "#a07000" },
 ];
 
 const channels = [
