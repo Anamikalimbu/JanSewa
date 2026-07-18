@@ -35,6 +35,13 @@ const icons = {
   phone:       "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
   github:      "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22",
   send:        "M12 19l9 2-9-18-9 18 9-2zm0 0v-8",
+  facebook:    "M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3V2z",
+  twitter:     "M18 6L6 18M6 6l12 12",
+  chat:        "M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z",
+  globe:       "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z",
+  sms:         "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z",
+  building:    "M5 21V7l7-4 7 4v14M3 21h18M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01",
+  clock:       "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
 };
 
 //  animated counter 
@@ -119,6 +126,32 @@ const team = [
   { initials: "DB", name: "Divya Bhandari", role: "Full-Stack Developer & Project Lead", bg: "rgba(255,193,7,0.15)", color: "#a07000" },
 ];
 
+const channels = [
+  { icon: "globe",    label: "Online",   value: "jansewa.gov.np",      href: "/register" },
+  { icon: "facebook", label: "Facebook", value: "@jansewa.np",         href: "https://www.facebook.com/" },
+  { icon: "twitter",  label: "X",        value: "@jansewa_np",         href: "https://x.com/" },
+  { icon: "phone",    label: "Phone",    value: "1111",                href: "tel:1111" },
+  { icon: "sms",      label: "SMS",      value: "+977-98XXXXXXXX",     href: "sms:+97798XXXXXXXX" },
+  { icon: "chat",     label: "WhatsApp", value: "+977-98XXXXXXXX",     href: "https://wa.me/" },
+];
+
+const complaintStats = [
+  { key: "total",      label: "Total Complaints", desc: "A complaint has been registered on the portal.",                 icon: "doc" },
+  { key: "seen",        label: "Seen",             desc: "The relevant department has reviewed the complaint.",           icon: "eye" },
+  { key: "processing",  label: "Processing",       desc: "The relevant department is investigating the complaint.",      icon: "chart" },
+  { key: "unseen",      label: "Unseen",           desc: "The relevant department has not yet addressed the complaint.", icon: "bell" },
+  { key: "solved",      label: "Solved",           desc: "The complaint has been resolved by the office.",                icon: "resolved" },
+  { key: "closed",      label: "Closed",           desc: "The relevant authority has closed the complaint.",              icon: "shield" },
+];
+
+const topOffices = [
+  { name: "Ward Office, Itahari-3",              count: 0 },
+  { name: "Water Supply & Sanitation Office",     count: 0 },
+  { name: "Roads Division Office, Sunsari",       count: 0 },
+  { name: "Nepal Electricity Authority, Itahari", count: 0 },
+  { name: "District Health Office, Sunsari",      count: 0 },
+];
+
 const contactItems = [
   { icon: "mail",   title: "Email",   lines: ["hello@jansewa.gov.np", "support@jansewa.gov.np"] },
   { icon: "phone",  title: "Phone",   lines: ["+977-1-4XXXXXX (Office)", "Mon-Fri, 10 am - 5 pm NST"] },
@@ -131,7 +164,9 @@ export default function LandingPage() {
   const [hoveredDept,  setHoveredDept] = useState(null);
   const [hoveredNav,   setHoveredNav]  = useState(null);
   const [hoveredSvc,   setHoveredSvc]  = useState(null);
-  const [stats,        setStats]       = useState({ total: 0, resolved: 0, rate: 0, departments: 8 });
+  const [stats,        setStats]       = useState({
+    total: 0, seen: 0, processing: 0, unseen: 0, solved: 0, closed: 0, departments: 8,
+  });
   const [loading,      setLoading]     = useState(false);
 
   // contact form state
@@ -172,24 +207,87 @@ export default function LandingPage() {
       fontFamily: "var(--font-body)",
     }}>
 
+      {/*  TOP UTILITY BAR  */}
+      <div style={{
+        width: "100%", boxSizing: "border-box", background: "var(--secondary)",
+        color: "rgba(255,255,255,0.9)", fontSize: 12, padding: "6px 32px",
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <a href="https://www.facebook.com/" style={{ display: "flex", alignItems: "center", color: "inherit" }} aria-label="Facebook">
+            <Icon d={icons.facebook} size={14} />
+          </a>
+          <a href="https://x.com/" style={{ display: "flex", alignItems: "center", color: "inherit" }} aria-label="X">
+            <Icon d={icons.twitter} size={14} />
+          </a>
+          <a href="tel:1111" style={{ display: "flex", alignItems: "center", gap: 5, color: "inherit" }}>
+            <Icon d={icons.phone} size={13} /> 1111
+          </a>
+          <a href="mailto:support@jansewa.gov.np" style={{ display: "flex", alignItems: "center", gap: 5, color: "inherit" }}>
+            <Icon d={icons.mail} size={13} /> support@jansewa.gov.np
+          </a>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 600 }}>
+          <span style={{ opacity: 0.65, cursor: "pointer" }}>नेपाली</span>
+          <span style={{ opacity: 0.4 }}>|</span>
+          <span style={{ cursor: "pointer" }}>English</span>
+        </div>
+      </div>
+
+      {/*  INSTITUTIONAL HEADER  */}
+      <div style={{
+        width: "100%", boxSizing: "border-box", background: "var(--card)",
+        borderBottom: "1px solid var(--border)", padding: "16px 32px",
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--primary), var(--secondary))",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <span style={{ color: "#fff", fontWeight: 800, fontSize: 20, fontFamily: "var(--font-display)" }}>J</span>
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
+              Local Government of Itahari
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Municipal Complaint &amp; Grievance Portal</div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Itahari, Sunsari District, Koshi Province, Nepal</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 10,
+            background: "linear-gradient(135deg, var(--accent), var(--accent-light))",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ color: "#fff", fontWeight: 800, fontSize: 15, fontFamily: "var(--font-display)" }}>JS</span>
+          </div>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--text-primary)", letterSpacing: -0.5 }}>
+            JanSewa
+          </span>
+        </div>
+      </div>
+
       {/*  NAVBAR  */}
       <nav style={{
         position: "sticky", top: 0, zIndex: 100, width: "100%",
         background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--border)",
-        padding: "0 32px", height: 60, boxSizing: "border-box",
+        padding: "0 32px", height: 56, boxSizing: "border-box",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 8,
+            width: 30, height: 30, borderRadius: 8,
             background: "linear-gradient(135deg, var(--primary), var(--secondary))",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 14, fontFamily: "var(--font-display)" }}>J</span>
+            <span style={{ color: "#fff", fontWeight: 800, fontSize: 13, fontFamily: "var(--font-display)" }}>J</span>
           </div>
-          <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)", letterSpacing: -0.3 }}>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "var(--text-primary)", letterSpacing: -0.3 }}>
             JanSewa
           </span>
         </div>
@@ -240,15 +338,16 @@ export default function LandingPage() {
           </div>
 
           <h1 style={{
-            fontFamily: "var(--font-display)", fontSize: 48, fontWeight: 800,
-            color: "var(--text-primary)", lineHeight: 1.1, letterSpacing: -1.5, marginBottom: 16,
+            fontFamily: "var(--font-display)", fontSize: 38, fontWeight: 800,
+            color: "var(--text-primary)", lineHeight: 1.25, letterSpacing: -0.8, marginBottom: 16,
+            maxWidth: 640, margin: "0 auto 16px",
           }}>
-            We're Here to{" "}
-            <span style={{ color: "var(--primary)" }}>Solve Together</span>
+            Do you have any inquiries, complaints, or suggestions regarding public services?{" "}
+            <span style={{ color: "var(--primary)" }}>Share it with JanSewa — we're ready to help.</span>
           </h1>
 
-          <p style={{ fontSize: 17, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 32, maxWidth: 480, margin: "0 auto 32px" }}>
-            Report public service issues, track progress in real time, and help build a better Nepal one complaint at a time.
+          <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 32, maxWidth: 480, margin: "0 auto 32px" }}>
+            Let us know — we're here to resolve it. Every complaint is reviewed, routed to the responsible office, and tracked until it's closed.
           </p>
 
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
@@ -272,21 +371,89 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/*  CHANNELS AVAILABLE FOR COMPLAINTS  */}
+      <section style={{
+        width: "100%", boxSizing: "border-box", padding: "36px 32px",
+        background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)",
+      }}>
+        <div style={{ textAlign: "center", marginBottom: 22 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--primary)", textTransform: "uppercase" }}>
+            Reach Us Anywhere
+          </span>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)", marginTop: 6 }}>
+            Channels Available for Complaints
+          </h2>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 12 }}>
+          {channels.map(({ icon, label, value, href }) => (
+            <a key={label} href={href} style={{
+              background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12,
+              padding: "16px 8px", textAlign: "center", boxSizing: "border-box",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+              transition: "box-shadow 0.15s, transform 0.15s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,128,128,0.14)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}
+            >
+              <div style={{
+                width: 44, height: 44, borderRadius: "50%",
+                background: "rgba(0,128,128,0.1)", display: "flex", alignItems: "center",
+                justifyContent: "center", color: "var(--primary)",
+              }}>
+                <Icon d={icons[icon]} size={20} />
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)" }}>{label}</div>
+              <div style={{ fontSize: 10, color: "var(--text-secondary)", wordBreak: "break-word" }}>{value}</div>
+            </a>
+          ))}
+        </div>
+      </section>
+
       {/*  STATS  */}
       <section style={{
-        background: "var(--card)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)",
-        width: "100%", boxSizing: "border-box", padding: "0 32px",
+        background: "var(--card)", borderBottom: "1px solid var(--border)",
+        width: "100%", boxSizing: "border-box", padding: "36px 32px",
       }}>
-        <div style={{ display: "flex", width: "100%" }}>
-          <StatCard value={stats.total}    label="Total Complaints" delay={0}   loading={loading} />
-          <StatCard value={stats.resolved} label="Resolved"         delay={150} loading={loading} />
-          <StatCard value={stats.rate} suffix="%" label="Resolution Rate" delay={300} loading={loading} />
-          <div style={{ flex: 1, textAlign: "center", padding: "18px 8px" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--text-primary)", letterSpacing: -1 }}>
-              {stats.departments}
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--primary)", textTransform: "uppercase" }}>
+            Transparency
+          </span>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)", marginTop: 6 }}>
+            Latest Status of Complaints
+          </h2>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 6 }}>
+            Your complaints, our commitment — stay updated on how issues are being addressed.
+          </p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 12 }}>
+          {complaintStats.map(({ key, label, desc, icon }) => (
+            <div key={key} style={{
+              border: "1px solid var(--border)", borderRadius: 12, padding: "16px 12px",
+              textAlign: "center", boxSizing: "border-box",
+            }}>
+              <div style={{
+                width: 38, height: 38, borderRadius: 10, margin: "0 auto 10px",
+                background: "rgba(0,128,128,0.1)", display: "flex", alignItems: "center",
+                justifyContent: "center", color: "var(--primary)",
+              }}>
+                <Icon d={icons[icon]} size={18} />
+              </div>
+              {loading ? (
+                <div className="skeleton" style={{ width: 44, height: 22, margin: "0 auto" }} />
+              ) : (
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>
+                  {stats[key].toLocaleString()}
+                  {key !== "total" && (
+                    <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>
+                      {" "}({stats.total ? Math.round((stats[key] / stats.total) * 100) : 0}%)
+                    </span>
+                  )}
+                </div>
+              )}
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginTop: 6 }}>{label}</div>
+              <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 4, lineHeight: 1.4 }}>{desc}</div>
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2, fontWeight: 500 }}>Departments</div>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -345,6 +512,42 @@ export default function LandingPage() {
                 <Icon d={icons[icon]} size={22} />
               </div>
               <div style={{ fontSize: 13, fontWeight: 600 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/*  OFFICES WITH MOST COMPLAINTS  */}
+        <SectionHeading
+          label="Accountability"
+          title="Offices with the Most Complaints Received"
+          sub="Monitoring the offices with the most complaints to improve service and transparency"
+        />
+        <div style={{
+          background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14,
+          padding: "8px 20px", marginBottom: 52, boxSizing: "border-box",
+        }}>
+          {topOffices.map(({ name, count }, i) => (
+            <div key={name} style={{
+              display: "flex", alignItems: "center", gap: 14, padding: "14px 0",
+              borderBottom: i < topOffices.length - 1 ? "1px solid var(--border)" : "none",
+            }}>
+              <div style={{
+                width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+                background: "rgba(0,128,128,0.1)", display: "flex", alignItems: "center",
+                justifyContent: "center", color: "var(--primary)",
+              }}>
+                <Icon d={icons.building} size={17} />
+              </div>
+              <div style={{ flex: 1, textAlign: "left", fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+                {name}
+              </div>
+              {loading ? (
+                <div className="skeleton" style={{ width: 32, height: 16 }} />
+              ) : (
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 700, color: "var(--primary)" }}>
+                  {count}
+                </div>
+              )}
             </div>
           ))}
         </div>

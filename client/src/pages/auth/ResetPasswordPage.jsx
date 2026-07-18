@@ -1,53 +1,58 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import AuthLayout from "../../components/AuthLayout";
 import FormField from "../../components/FormField";
 import { useAuth } from "../../context/AuthContext";
 
-const MailIcon = () => (
+const LockIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    <rect x="5" y="11" width="14" height="9" rx="2" />
+    <path d="M8 11V7a4 4 0 118 0v4" />
   </svg>
 );
 
-export default function ForgotPasswordPage() {
-  const { forgotPassword } = useAuth();
+export default function ResetPasswordPage() {
+  const { resetPassword } = useAuth();
+  const navigate = useNavigate();
+  const { token } = useParams();
 
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+  const [form, setForm] = useState({ password: "", confirmPassword: "" });
+  const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [devResetUrl, setDevResetUrl] = useState("");
+  const [done, setDone] = useState(false);
 
   const handleChange = (e) => {
-    setEmail(e.target.value);
-    setError("");
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
+
+  const validate = () => {
+    const next = {};
+    if (!form.password) next.password = "Password is required";
+    else if (form.password.length < 8) next.password = "Password must be at least 8 characters";
+
+    if (!form.confirmPassword) next.confirmPassword = "Please confirm your password";
+    else if (form.confirmPassword !== form.password) next.confirmPassword = "Passwords do not match";
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError("");
-
-    if (!email.trim()) {
-      setError("Email is required");
-      return;
-    }
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setError("Enter a valid email address");
-      return;
-    }
+    if (!validate()) return;
 
     setLoading(true);
     try {
-      const res = await forgotPassword(email);
-      // In non-production environments, the API also returns the reset
-      // link directly so the flow can be tested without SMTP set up.
-      setDevResetUrl(res?.data?.resetUrl || "");
-      setSent(true);
+      await resetPassword(token, form.password);
+      setDone(true);
+      setTimeout(() => navigate("/home"), 1500);
     } catch (err) {
       setSubmitError(
-        err?.response?.data?.message || "Couldn't send the reset link. Please try again."
+        err?.response?.data?.message || "This reset link is invalid or has expired."
       );
     } finally {
       setLoading(false);
@@ -57,22 +62,22 @@ export default function ForgotPasswordPage() {
   return (
     <AuthLayout
       eyebrow="Reset password"
-      title="Forgot Password"
+      title="Set a new password"
       subtitle={
-        sent
-          ? "Check your inbox for the reset link."
-          : "Enter your registered email and we'll send you a link to reset your password."
+        done
+          ? "Your password has been updated. Redirecting you now…"
+          : "Choose a new password for your JanSewa account."
       }
       footer={
         <>
-          Remember password?{" "}
+          Remember your password?{" "}
           <Link to="/login" style={{ color: "var(--primary)", fontWeight: 600 }}>
             Back to Login
           </Link>
         </>
       }
     >
-      {sent ? (
+      {done ? (
         <div style={{ textAlign: "center", padding: "8px 0 4px" }}>
           <div
             style={{
@@ -87,42 +92,33 @@ export default function ForgotPasswordPage() {
             </svg>
           </div>
           <p style={{ fontSize: 13.5, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-            We've sent a password reset link to <strong style={{ color: "var(--text-primary)" }}>{email}</strong>.
-            Didn't get it?{" "}
-            <button
-              type="button"
-              onClick={() => setSent(false)}
-              style={{ background: "none", border: "none", padding: 0, color: "var(--primary)", fontWeight: 600, cursor: "pointer" }}
-            >
-              Try again
-            </button>
+            You're logged in with your new password.
           </p>
-
-          {devResetUrl && (
-            <div style={{
-              marginTop: 16, background: "var(--background)", border: "1px dashed var(--border)",
-              borderRadius: 8, padding: "10px 12px", fontSize: 12, color: "var(--text-secondary)",
-              wordBreak: "break-all",
-            }}>
-              <strong style={{ color: "var(--text-primary)" }}>Dev mode</strong> — SMTP isn't configured, so here's your reset link directly:{" "}
-              <Link to={devResetUrl.replace(/^https?:\/\/[^/]+/, "")} style={{ color: "var(--primary)", fontWeight: 600 }}>
-                {devResetUrl}
-              </Link>
-            </div>
-          )}
         </div>
       ) : (
         <form onSubmit={handleSubmit} noValidate>
           <FormField
-            label="Enter your registered email"
-            name="email"
-            type="email"
-            placeholder="you@example.com"
-            autoComplete="email"
-            icon={<MailIcon />}
-            value={email}
+            label="New password"
+            name="password"
+            type="password"
+            placeholder="••••••••••"
+            autoComplete="new-password"
+            icon={<LockIcon />}
+            value={form.password}
             onChange={handleChange}
-            error={error}
+            error={errors.password}
+          />
+
+          <FormField
+            label="Confirm new password"
+            name="confirmPassword"
+            type="password"
+            placeholder="••••••••••"
+            autoComplete="new-password"
+            icon={<LockIcon />}
+            value={form.confirmPassword}
+            onChange={handleChange}
+            error={errors.confirmPassword}
           />
 
           {submitError && (
@@ -148,7 +144,7 @@ export default function ForgotPasswordPage() {
               transition: "background 0.15s",
             }}
           >
-            {loading ? "Sending…" : "Send Reset Link"}
+            {loading ? "Updating…" : "Reset Password"}
           </button>
         </form>
       )}
