@@ -20,6 +20,9 @@
 import api from "./api";
 
 export const complaintService = {
+  getStats: () => api.get("/complaints/stats"),
+  getMyStats: () => api.get("/complaints/stats/me"),
+  getMine: (params) => api.get("/complaints/mine", { params }),
   getAll: (params) => api.get("/complaints", { params }),
   getById: (id) => api.get(`/complaints/${id}`),
   create: (data) => api.post("/complaints", data),
