@@ -6,7 +6,7 @@
  *
  */
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import api from "../services/api";
 
 const AuthContext = createContext(null);
@@ -14,6 +14,31 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
+  // true while we check for an existing session on first load
+  const [loading, setLoading] = useState(true);
+
+  // On first load, if a token is already stored, fetch the profile it
+  // belongs to so a page refresh doesn't silently log the user out.
+  useEffect(() => {
+    const restoreSession = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const { data } = await api.get("/auth/me");
+        setUser(data.data?.user || null);
+      } catch (err) {
+        // token invalid/expired — clear it out
+        setToken(null);
+        localStorage.removeItem("token");
+      } finally {
+        setLoading(false);
+      }
+    };
+    restoreSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = async (credentials) => {
     const { data } = await api.post("/auth/login", credentials);
@@ -38,6 +63,15 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const resetPassword = async (resetToken, password) => {
+    const { data } = await api.post(`/auth/reset-password/${resetToken}`, { password });
+    const { user: updatedUser, token: authToken } = data.data || data;
+    setUser(updatedUser);
+    setToken(authToken);
+    if (authToken) localStorage.setItem("token", authToken);
+    return updatedUser;
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -45,7 +79,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, forgotPassword, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, loading, login, register, forgotPassword, resetPassword, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
