@@ -1,4 +1,7 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const { ROLES } = require("../constants");
 
 /**
@@ -53,21 +56,71 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    // --- Password reset ---
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt automatically
   }
 );
 
-// Index for fast lookups by email and role
-userSchema.index({ email: 1 });
+// Index for fast lookups by role
 userSchema.index({ role: 1 });
+
+// --- Hash the password before saving (only if it was modified) ---
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+// --- Compare a plaintext candidate password against the stored hash ---
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+// --- Sign a JWT for this user ---
+userSchema.methods.generateAuthToken = function () {
+  return jwt.sign(
+    { id: this._id, role: this.role },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+  );
+};
+
+// --- Generate a password reset token ---
+// Returns the *unhashed* token (sent to the user via email/link).
+// Only the SHA-256 hash of it is stored on the document, so a leaked
+// database can never be used to reset someone's password.
+userSchema.methods.generatePasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.passwordResetExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
+
+  return resetToken;
+};
 
 // Remove sensitive fields when serializing to JSON
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
   delete obj.__v;
+  delete obj.passwordResetToken;
+  delete obj.passwordResetExpires;
   return obj;
 };
 

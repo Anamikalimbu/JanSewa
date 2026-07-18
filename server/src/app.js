@@ -4,6 +4,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 
 // Route imports
+const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
 const departmentRoutes = require("./routes/departmentRoutes");
@@ -57,6 +58,7 @@ app.get("/health", (req, res) => {
 
 const API_PREFIX = "/api";
 
+app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/complaints`, complaintRoutes);
 app.use(`${API_PREFIX}/departments`, departmentRoutes);
