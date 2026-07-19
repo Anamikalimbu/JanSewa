@@ -73,7 +73,6 @@ const userSchema = new mongoose.Schema(
 );
 
 // Index for fast lookups by email and role
-userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 
 // --- Hash the password before saving (only if it was modified) ---

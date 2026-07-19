@@ -41,6 +41,17 @@ const errorHandler = (err, req, res, next) => {
     message = `${field} already exists. Please use a different value.`;
   }
 
+  // --- Multer: file upload errors (size/count limits) ---
+  if (err.name === "MulterError") {
+    statusCode = 400;
+    message =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "Each image must be 5MB or smaller."
+        : err.code === "LIMIT_FILE_COUNT" || err.code === "LIMIT_UNEXPECTED_FILE"
+        ? "You can upload at most 5 images."
+        : err.message;
+  }
+
   // --- JWT: Invalid Token ---
   if (err.name === "JsonWebTokenError") {
     statusCode = 401;

@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -19,7 +20,10 @@ const app = express();
 // Security Middleware
 
 // Set secure HTTP headers (XSS, clickjacking, etc.)
-app.use(helmet());
+// crossOriginResourcePolicy is relaxed to "cross-origin" so uploaded
+// complaint images can be loaded by the frontend, which runs on a
+// different origin/port in development.
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 // CORS — allow requests from the React frontend
 app.use(
@@ -53,6 +57,9 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Uploaded complaint images
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 // API Routes
 

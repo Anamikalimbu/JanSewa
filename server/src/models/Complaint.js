@@ -51,6 +51,22 @@ const complaintSchema = new mongoose.Schema(
       },
     },
 
+    // Free-text sub-category (e.g. "Leakage" under "Water") — the
+    // available options are served by GET /api/complaints/meta/categories
+    // so the frontend dropdown and translations stay data-driven.
+    subCategory: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    wardNumber: {
+      type: String,
+      trim: true,
+      maxlength: [20, "Ward number looks too long"],
+      default: "",
+    },
+
     priority: {
       type: String,
       enum: {
@@ -97,6 +113,53 @@ const complaintSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Department",
       default: null, // Null until assigned by admin
+    },
+
+    // Free-text name shown as "Assigned To" on the complaint detail page
+    // (e.g. "Ram Bahadur (Field Officer)") — set by admin/department staff.
+    assignedOfficer: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    // A running log of every status change, powering the "Status Timeline"
+    // on the complaint detail page.
+    statusHistory: {
+      type: [
+        {
+          status: { type: String, required: true },
+          note: { type: String, trim: true, default: "" },
+          changedAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
+
+    // Citizen/department discussion thread on the complaint.
+    comments: {
+      type: [
+        {
+          authorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+          authorName: { type: String, trim: true },
+          message: { type: String, trim: true, required: true, maxlength: 1000 },
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
+
+    // Lets a citizen flag their own complaint (e.g. "no action taken"),
+    // surfaced to admins separately from the normal status flow.
+    reports: {
+      type: [
+        {
+          userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+          reason: { type: String, trim: true, required: true, maxlength: 500 },
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
     },
 
     // --- AI-populated fields ---
