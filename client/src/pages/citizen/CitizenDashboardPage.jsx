@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { complaintService } from "../../services/complaintService";
 
 const iconPaths = {
@@ -17,21 +18,21 @@ const Icon = ({ d, size = 16 }) => (
 );
 
 const STATUS_STYLES = {
-  Pending:     { bg: "rgba(255,193,7,0.15)",  fg: "#8a6d00", label: "Pending" },
-  Assigned:    { bg: "rgba(0,128,128,0.12)",  fg: "var(--secondary)", label: "Assigned" },
-  InProgress:  { bg: "rgba(0,128,128,0.12)",  fg: "var(--secondary)", label: "In Progress" },
-  Resolved:    { bg: "rgba(40,167,69,0.14)",  fg: "#1e7a34", label: "Resolved" },
-  Closed:      { bg: "#eef0f2",               fg: "var(--text-secondary)", label: "Closed" },
+  Pending:     { bg: "rgba(255,193,7,0.15)",  fg: "#8a6d00", key: "status_pending" },
+  Assigned:    { bg: "rgba(0,128,128,0.12)",  fg: "var(--secondary)", key: "status_assigned" },
+  InProgress:  { bg: "rgba(0,128,128,0.12)",  fg: "var(--secondary)", key: "status_inprogress" },
+  Resolved:    { bg: "rgba(40,167,69,0.14)",  fg: "#1e7a34", key: "status_resolved" },
+  Closed:      { bg: "#eef0f2",               fg: "var(--text-secondary)", key: "status_closed" },
 };
 
-const StatusBadge = ({ status }) => {
-  const s = STATUS_STYLES[status] || { bg: "#eef0f2", fg: "var(--text-secondary)", label: status };
+const StatusBadge = ({ status, t }) => {
+  const s = STATUS_STYLES[status] || { bg: "#eef0f2", fg: "var(--text-secondary)", key: "status_pending" };
   return (
     <span style={{
       display: "inline-block", padding: "3px 10px", borderRadius: 20,
       fontSize: 11.5, fontWeight: 700, background: s.bg, color: s.fg, whiteSpace: "nowrap",
     }}>
-      {s.label}
+      {t(s.key)}
     </span>
   );
 };
@@ -57,6 +58,7 @@ const StatCard = ({ label, value, loading }) => (
 
 export default function CitizenDashboardPage() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({ total: 0, pending: 0, inProgress: 0, resolved: 0 });
@@ -100,10 +102,10 @@ export default function CitizenDashboardPage() {
   return (
     <DashboardLayout>
       <div style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, color: "var(--text-primary)" }}>
-        Welcome back, {firstName}!
+        {t("dash_welcome")}, {firstName}!
       </div>
       <div style={{ fontSize: 13.5, color: "var(--text-secondary)", marginBottom: 22 }}>
-        Here's what's happening with your complaints today.
+        {t("dash_subtitle")}
       </div>
 
       {error && (
@@ -117,17 +119,17 @@ export default function CitizenDashboardPage() {
 
       {/* STAT CARDS */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 28 }}>
-        <StatCard label="Total Complaints" value={stats.total} loading={loading} />
-        <StatCard label="In Progress"      value={stats.inProgress} loading={loading} />
-        <StatCard label="Resolved"         value={stats.resolved} loading={loading} />
-        <StatCard label="Pending"          value={stats.pending} loading={loading} />
+        <StatCard label={t("dash_totalComplaints")} value={stats.total} loading={loading} />
+        <StatCard label={t("dash_inProgress")}      value={stats.inProgress} loading={loading} />
+        <StatCard label={t("dash_resolved")}         value={stats.resolved} loading={loading} />
+        <StatCard label={t("dash_pending")}          value={stats.pending} loading={loading} />
       </div>
 
       {/* RECENT COMPLAINTS */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <div style={{ fontSize: 15.5, fontWeight: 700, color: "var(--text-primary)" }}>Recent Complaints</div>
+        <div style={{ fontSize: 15.5, fontWeight: 700, color: "var(--text-primary)" }}>{t("dash_recentComplaints")}</div>
         <Link to="/complaints" style={{ fontSize: 12.5, color: "var(--primary)", fontWeight: 600 }}>
-          View All →
+          {t("dash_viewAll")}
         </Link>
       </div>
 
@@ -137,10 +139,10 @@ export default function CitizenDashboardPage() {
           borderBottom: "1px solid var(--border)", fontSize: 11.5, fontWeight: 700,
           color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: 0.5, gap: 8,
         }}>
-          <span style={{ flex: 3 }}>Title</span>
-          <span style={{ flex: 2 }}>ID</span>
-          <span style={{ flex: 2 }}>Status</span>
-          <span style={{ flex: 2 }}>Date</span>
+          <span style={{ flex: 3 }}>{t("dash_col_title")}</span>
+          <span style={{ flex: 2 }}>{t("dash_col_id")}</span>
+          <span style={{ flex: 2 }}>{t("dash_col_status")}</span>
+          <span style={{ flex: 2 }}>{t("dash_col_date")}</span>
         </div>
 
         {loading ? (
@@ -154,9 +156,9 @@ export default function CitizenDashboardPage() {
           ))
         ) : recent.length === 0 ? (
           <div style={{ padding: "28px 16px", textAlign: "center", fontSize: 13, color: "var(--text-secondary)" }}>
-            You haven't filed any complaints yet.{" "}
+            {t("dash_noComplaints")}{" "}
             <Link to="/complaints/new" style={{ color: "var(--primary)", fontWeight: 600 }}>
-              Submit your first one →
+              {t("dash_submitFirst")}
             </Link>
           </div>
         ) : (
@@ -170,7 +172,7 @@ export default function CitizenDashboardPage() {
             >
               <span style={{ flex: 3, fontWeight: 500 }}>{c.title}</span>
               <span style={{ flex: 2, fontSize: 11.5, color: "var(--text-muted)" }}>#{c.code}</span>
-              <span style={{ flex: 2 }}><StatusBadge status={c.status} /></span>
+              <span style={{ flex: 2 }}><StatusBadge status={c.status} t={t} /></span>
               <span style={{ flex: 2, fontSize: 12, color: "var(--text-secondary)" }}>{formatDate(c.createdAt)}</span>
             </div>
           ))
@@ -179,7 +181,7 @@ export default function CitizenDashboardPage() {
 
       {/* QUICK ACTIONS */}
       <div style={{ fontSize: 15.5, fontWeight: 700, color: "var(--text-primary)", marginBottom: 12 }}>
-        Quick Actions
+        {t("dash_quickActions")}
       </div>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         <Link to="/complaints/new" style={{
@@ -187,21 +189,21 @@ export default function CitizenDashboardPage() {
           border: "1px solid var(--border)", background: "var(--card)", fontSize: 13.5,
           fontWeight: 600, color: "var(--primary)",
         }}>
-          <Icon d={iconPaths.plus} /> Submit New Complaint
+          <Icon d={iconPaths.plus} /> {t("dash_submitNew")}
         </Link>
         <Link to="/complaints" style={{
           display: "flex", alignItems: "center", gap: 8, padding: "12px 18px", borderRadius: 10,
           border: "1px solid var(--border)", background: "var(--card)", fontSize: 13.5,
           fontWeight: 600, color: "var(--text-primary)",
         }}>
-          <Icon d={iconPaths.search} /> Track Complaint
+          <Icon d={iconPaths.search} /> {t("dash_trackComplaint")}
         </Link>
         <Link to="/profile" style={{
           display: "flex", alignItems: "center", gap: 8, padding: "12px 18px", borderRadius: 10,
           border: "1px solid var(--border)", background: "var(--card)", fontSize: 13.5,
           fontWeight: 600, color: "var(--text-primary)",
         }}>
-          <Icon d={iconPaths.user} /> Edit Profile
+          <Icon d={iconPaths.user} /> {t("dash_editProfile")}
         </Link>
       </div>
     </DashboardLayout>

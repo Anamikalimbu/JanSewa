@@ -21,6 +21,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const [portal, setPortal] = useState("citizen"); // "citizen" | "admin"
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
@@ -48,8 +49,8 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      await login(form);
-      navigate("/home");
+      const loggedInUser = await login({ ...form, role: portal });
+      navigate(loggedInUser?.role === "admin" ? "/admin" : "/home");
     } catch (err) {
       setSubmitError(
         err?.response?.data?.message || "Couldn't sign you in. Check your credentials and try again."
@@ -62,8 +63,12 @@ export default function LoginPage() {
   return (
     <AuthLayout
       eyebrow="Welcome back"
-      title="Login to your account"
-      subtitle="Enter your details to continue tracking and submitting complaints."
+      title={portal === "admin" ? "Admin / Staff Login" : "Login to your account"}
+      subtitle={
+        portal === "admin"
+          ? "Sign in to manage complaints, departments, and users."
+          : "Enter your details to continue tracking and submitting complaints."
+      }
       footer={
         <>
           Don't have an account?{" "}
@@ -73,6 +78,32 @@ export default function LoginPage() {
         </>
       }
     >
+      {/* Citizen / Admin portal selector */}
+      <div style={{
+        display: "flex", background: "var(--background)", borderRadius: 10, padding: 4, marginBottom: 22,
+      }}>
+        {[
+          { key: "citizen", label: "Citizen" },
+          { key: "admin", label: "Admin / Staff" },
+        ].map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => { setPortal(key); setSubmitError(""); }}
+            style={{
+              flex: 1, padding: "9px 10px", borderRadius: 8, border: "none", cursor: "pointer",
+              fontSize: 13, fontWeight: 700,
+              background: portal === key ? "var(--card)" : "transparent",
+              color: portal === key ? "var(--primary)" : "var(--text-secondary)",
+              boxShadow: portal === key ? "0 1px 4px rgba(15,23,42,0.08)" : "none",
+              transition: "background 0.15s, color 0.15s",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <form onSubmit={handleSubmit} noValidate>
         <FormField
           label="Email"
@@ -130,7 +161,7 @@ export default function LoginPage() {
             transition: "background 0.15s",
           }}
         >
-          {loading ? "Signing in…" : "Login"}
+          {loading ? "Signing in…" : portal === "admin" ? "Login as Admin / Staff" : "Login as Citizen"}
         </button>
       </form>
     </AuthLayout>

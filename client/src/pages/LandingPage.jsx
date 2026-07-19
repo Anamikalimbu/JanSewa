@@ -8,6 +8,60 @@ const Icon = ({ d, size = 24 }) => (
   </svg>
 );
 
+//  hero illustration — self-contained SVG so the hero never depends on an
+//  external image host. Depicts a citizen filing a complaint from their
+//  phone, routed to a government office, set against a Himalayan skyline.
+const HeroIllustration = () => (
+  <svg viewBox="0 0 480 400" width="100%" height="auto" role="img" aria-label="Citizen submitting a complaint through JanSewa">
+    {/* sky blob */}
+    <circle cx="240" cy="180" r="170" fill="rgba(0,128,128,0.07)" />
+
+    {/* mountains */}
+    <path d="M20 260 L110 140 L165 210 L230 110 L300 260 Z" fill="var(--secondary)" opacity="0.9" />
+    <path d="M150 260 L235 150 L300 230 L360 160 L460 260 Z" fill="var(--primary)" opacity="0.85" />
+    <path d="M95 175 L110 140 L125 172 Z" fill="#fff" opacity="0.9" />
+    <path d="M212 145 L230 110 L248 145 Z" fill="#fff" opacity="0.9" />
+    <path d="M340 195 L360 160 L378 195 Z" fill="#fff" opacity="0.9" />
+
+    {/* ground */}
+    <rect x="0" y="258" width="480" height="16" fill="var(--border)" opacity="0.6" />
+
+    {/* government building */}
+    <g transform="translate(300,178)">
+      <rect x="0" y="0" width="110" height="82" rx="4" fill="var(--card)" stroke="var(--border)" strokeWidth="2" />
+      <polygon points="-8,0 118,0 55,-28" fill="var(--primary)" />
+      <rect x="14" y="18" width="14" height="64" fill="var(--background)" />
+      <rect x="40" y="18" width="14" height="64" fill="var(--background)" />
+      <rect x="66" y="18" width="14" height="64" fill="var(--background)" />
+      <rect x="92" y="30" width="14" height="52" fill="var(--background)" />
+    </g>
+    {/* citizen with phone */}
+    <g transform="translate(70,190)">
+      <circle cx="30" cy="8" r="16" fill="#f2c9a0" />
+      <path d="M4 78c0-24 12-40 26-40s26 16 26 40Z" fill="var(--accent)" />
+      <rect x="42" y="34" width="20" height="30" rx="4" fill="var(--text-primary)" transform="rotate(18 42 34)" />
+    </g>
+
+    {/* floating complaint card with checkmark, connecting citizen -> building */}
+    <g transform="translate(168,90)">
+      <rect x="0" y="0" width="92" height="66" rx="10" fill="var(--card)" stroke="var(--border)" strokeWidth="2" />
+      <rect x="14" y="16" width="50" height="6" rx="3" fill="var(--border)" />
+      <rect x="14" y="30" width="64" height="6" rx="3" fill="var(--border)" />
+      <rect x="14" y="44" width="38" height="6" rx="3" fill="var(--border)" />
+      <circle cx="76" cy="12" r="12" fill="var(--primary)" />
+      <path d="M70 12l4 4 8-8" stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+
+    {/* dashed route from card to building */}
+    <path d="M258 118 C280 118 285 150 305 155" stroke="var(--accent)" strokeWidth="2.5" strokeDasharray="5 6" fill="none" />
+
+    {/* small floating dots for motion */}
+    <circle cx="150" cy="70" r="4" fill="var(--accent)" opacity="0.6" />
+    <circle cx="410" cy="120" r="5" fill="var(--secondary)" opacity="0.5" />
+    <circle cx="60" cy="120" r="4" fill="var(--primary)" opacity="0.5" />
+  </svg>
+);
+
 const icons = {
   submit:      "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
   review:      "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
@@ -62,6 +116,28 @@ function useCountUp(target, duration = 1800) {
   return val;
 }
 
+//  stat card 
+function StatCard({ value, suffix = "", label, delay = 0, loading }) {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setActive(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+  const count = useCountUp(active ? value : 0);
+  return (
+    <div style={{ flex: 1, textAlign: "center", padding: "18px 8px", borderRight: "1px solid var(--border)" }}>
+      {loading ? (
+        <div className="skeleton" style={{ width: 64, height: 28, margin: "0 auto" }} />
+      ) : (
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--text-primary)", letterSpacing: -1 }}>
+          {count.toLocaleString()}{suffix}
+        </div>
+      )}
+      <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: loading ? 8 : 2, fontWeight: 500 }}>{label}</div>
+    </div>
+  );
+}
+
 //  section heading helper 
 function SectionHeading({ label, title, sub, style = {} }) {
   return (
@@ -106,13 +182,13 @@ const team = [
   {
     initials: "AL", key: "anamika",
     bg: "rgba(0,128,128,0.12)", color: "#006666",
-    github: "#", linkedin: "#",
+    github: "https://github.com/Anamikalimbu", linkedin: "https://www.linkedin.com/in/anamika-limbu-b01238340/",
     portfolio: "https://anamikalimbu-portfolio.netlify.app/",
   },
   {
     initials: "DB", key: "divya",
     bg: "rgba(255,193,7,0.15)", color: "#a07000",
-    github: "#", linkedin: "#",
+    github: "https://github.com/Divya-Bhandari", linkedin: "https://www.linkedin.com/in/divya-bhandari-24a2323b9/",
     portfolio: null,
   },
 ];
@@ -136,6 +212,7 @@ const translations = {
       submit: "Submit Complaint",
       track: "Track Complaint",
     },
+    trustedBy: "Built for the citizens & local government offices of Nepal",
     channels: {
       eyebrow: "Reach Us Anywhere",
       title: "Channels Available for Complaints",
@@ -259,6 +336,7 @@ const translations = {
       submit: "उजुरी दर्ता गर्नुहोस्",
       track: "उजुरी ट्र्याक गर्नुहोस्",
     },
+    trustedBy: "नेपालका नागरिक र स्थानीय सरकारी कार्यालयहरूका लागि निर्मित",
     channels: {
       eyebrow: "हामीलाई जहाँबाट पनि सम्पर्क गर्नुहोस्",
       title: "उजुरीका लागि उपलब्ध माध्यमहरू",
@@ -463,13 +541,11 @@ export default function LandingPage() {
         display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--primary), var(--secondary))",
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 20, fontFamily: "var(--font-display)" }}>J</span>
-          </div>
+          <img
+            src="/images/emblem-of-nepal-sm.png"
+            alt="Emblem of Nepal"
+            style={{ width: 52, height: 52, objectFit: "contain", flexShrink: 0 }}
+          />
           <div>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
               {t.header.govName}
@@ -479,13 +555,11 @@ export default function LandingPage() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 10,
-            background: "linear-gradient(135deg, var(--accent), var(--accent-light))",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 15, fontFamily: "var(--font-display)" }}>JS</span>
-          </div>
+          <img
+            src="/images/emblem-of-nepal-sm.png"
+            alt="JanSewa"
+            style={{ width: 40, height: 40, objectFit: "contain" }}
+          />
           <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--text-primary)", letterSpacing: -0.5 }}>
             JanSewa
           </span>
@@ -502,13 +576,11 @@ export default function LandingPage() {
       }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: 8,
-            background: "linear-gradient(135deg, var(--primary), var(--secondary))",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 13, fontFamily: "var(--font-display)" }}>J</span>
-          </div>
+          <img
+            src="/images/emblem-of-nepal-sm.png"
+            alt="JanSewa"
+            style={{ width: 30, height: 30, objectFit: "contain" }}
+          />
           <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "var(--text-primary)", letterSpacing: -0.3 }}>
             JanSewa
           </span>
@@ -543,54 +615,77 @@ export default function LandingPage() {
       <section id="home" style={{
         width: "100%", boxSizing: "border-box",
         background: "linear-gradient(135deg, rgba(0,128,128,0.08) 0%, rgba(0,102,102,0.06) 50%, rgba(255,193,7,0.06) 100%)",
-        padding: "80px 32px 60px", textAlign: "center", position: "relative", overflow: "hidden",
+        padding: "72px 32px 56px", position: "relative", overflow: "hidden",
       }}>
         {/* decorative blobs */}
         <div style={{ position: "absolute", top: -60, right: -60, width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(77,182,182,0.18), transparent 70%)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -40, left: -40, width: 240, height: 240, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,193,7,0.14), transparent 70%)", pointerEvents: "none" }} />
 
-        <div style={{ position: "relative", maxWidth: 680, margin: "0 auto" }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            background: "rgba(0,128,128,0.08)", borderRadius: 20, padding: "4px 14px",
-            fontSize: 12, fontWeight: 600, color: "var(--primary)", marginBottom: 20,
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--primary-Light)", display: "inline-block" }} />
-            {t.hero.badge}
+        <div style={{
+          position: "relative", maxWidth: 1180, margin: "0 auto",
+          display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 40, alignItems: "center",
+        }}>
+          {/* Left — copy */}
+          <div style={{ textAlign: "left" }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: "rgba(0,128,128,0.08)", borderRadius: 20, padding: "4px 14px",
+              fontSize: 12, fontWeight: 600, color: "var(--primary)", marginBottom: 20,
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--primary-Light)", display: "inline-block" }} />
+              {t.hero.badge}
+            </div>
+
+            <h1 style={{
+              fontFamily: "var(--font-display)", fontSize: 38, fontWeight: 800,
+              color: "var(--text-primary)", lineHeight: 1.25, letterSpacing: -0.8, marginBottom: 16,
+              maxWidth: 560,
+            }}>
+              {t.hero.titleMain}{" "}
+              <span style={{ color: "var(--primary)" }}>{t.hero.titleHighlight}</span>
+            </h1>
+
+            <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 32, maxWidth: 480 }}>
+              {t.hero.sub}
+            </p>
+
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <a href="/submit" style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                background: "var(--primary)", color: "#fff",
+                padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
+                boxShadow: "0 4px 14px rgba(0,128,128,0.4)", transition: "transform 0.15s",
+              }}>
+                {t.hero.submit} <Icon d={icons.arrow} size={18} />
+              </a>
+              <a href="/track" style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                background: "var(--card)", color: "var(--text-primary)",
+                padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
+                border: "1.5px solid var(--border)",
+              }}>
+                {t.hero.track}
+              </a>
+            </div>
           </div>
 
-          <h1 style={{
-            fontFamily: "var(--font-display)", fontSize: 38, fontWeight: 800,
-            color: "var(--text-primary)", lineHeight: 1.25, letterSpacing: -0.8, marginBottom: 16,
-            maxWidth: 640, margin: "0 auto 16px",
-          }}>
-            {t.hero.titleMain}{" "}
-            <span style={{ color: "var(--primary)" }}>{t.hero.titleHighlight}</span>
-          </h1>
-
-          <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 32, maxWidth: 480, margin: "0 auto 32px" }}>
-            {t.hero.sub}
-          </p>
-
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="/submit" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              background: "var(--primary)", color: "#fff",
-              padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
-              boxShadow: "0 4px 14px rgba(0,128,128,0.4)", transition: "transform 0.15s",
-            }}>
-              {t.hero.submit} <Icon d={icons.arrow} size={18} />
-            </a>
-            <a href="/track" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              background: "var(--card)", color: "var(--text-primary)",
-              padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
-              border: "1.5px solid var(--border)",
-            }}>
-              {t.hero.track}
-            </a>
+          {/* Right — illustration */}
+          <div style={{ position: "relative" }}>
+            <HeroIllustration />
           </div>
         </div>
+      </section>
+
+      {/*  TRUSTED-BY STRIP  */}
+      <section style={{
+        width: "100%", boxSizing: "border-box", padding: "20px 32px",
+        background: "var(--card)", borderBottom: "1px solid var(--border)",
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap",
+      }}>
+        <img src="/images/emblem-of-nepal-sm.png" alt="Government of Nepal" style={{ width: 30, height: 30, objectFit: "contain", opacity: 0.85 }} />
+        <span style={{ fontSize: 12.5, color: "var(--text-muted)", fontWeight: 600 }}>
+          {t.trustedBy}
+        </span>
       </section>
 
       {/*  CHANNELS AVAILABLE FOR COMPLAINTS  */}
@@ -1079,13 +1174,7 @@ export default function LandingPage() {
         display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{
-            width: 26, height: 26, borderRadius: 6,
-            background: "linear-gradient(135deg, var(--primary), var(--secondary))",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ color: "var(--card)", fontWeight: 800, fontSize: 11, fontFamily: "var(--font-display)" }}>J</span>
-          </div>
+          <img src="/images/emblem-of-nepal-sm.png" alt="JanSewa" style={{ width: 26, height: 26, objectFit: "contain" }} />
           <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "var(--text-primary)" }}>JanSewa</span>
         </div>
         <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
