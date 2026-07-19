@@ -1,10 +1,13 @@
 import { AuthProvider } from "./context/AuthContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import AppRouter from "./routes/AppRouter";
 
 const App = () => (
-  <AuthProvider>
-    <AppRouter />
-  </AuthProvider>
+  <LanguageProvider>
+    <AuthProvider>
+      <AppRouter />
+    </AuthProvider>
+  </LanguageProvider>
 );
 
 export default App;

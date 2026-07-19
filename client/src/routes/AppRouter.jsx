@@ -7,6 +7,7 @@ import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import MyComplaintsPage from "../pages/citizen/MyComplaintsPage";
 import SubmitComplaintPage from "../pages/citizen/SubmitComplaintPage";
+import ComplaintDetailPage from "../pages/citizen/ComplaintDetailPage";
 import NotificationsPage from "../pages/citizen/NotificationsPage";
 import ProfilePage from "../pages/citizen/ProfilePage";
 import SettingsPage from "../pages/citizen/SettingsPage";
@@ -22,6 +23,7 @@ const AppRouter = () => (
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       <Route path="/complaints" element={<MyComplaintsPage />} />
       <Route path="/complaints/new" element={<SubmitComplaintPage />} />
+      <Route path="/complaints/:id" element={<ComplaintDetailPage />} />
       <Route path="/notifications" element={<NotificationsPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/settings" element={<SettingsPage />} />

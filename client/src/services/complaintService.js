@@ -1,30 +1,38 @@
 /**
  * services/complaintService.js
- * API calls related to complaints.
- * This abstracts away the API details from the components.
- * Each function corresponds to a backend endpoint.
- * This keeps our components clean and focused on UI logic.
- * The actual API calls are made using the `api` instance from services/api.js,
- * which is pre-configured with the base URL and interceptors.
- * This file can be easily extended in the future as we add more complaint-related features.
- * For example, we could add functions for adding comments to complaints, or fetching complaint statistics.
- * This modular approach also makes it easier to mock API calls in tests.
- * We can simply mock the functions in this service without worrying about the underlying HTTP details.
- * Overall, this service layer is a crucial part of our frontend architecture, promoting separation of concerns and maintainability.
- * As we build out the complaint management features, this service will be the go-to place for all API interactions related to complaints.
- * It will help us keep our components clean and focused on rendering the UI and handling user interactions.
- * In the future, we might also add error handling logic here to standardize how we deal with API errors across the app.
- * For now, it provides a simple and consistent interface for our components to interact with the backend.
+ * API calls related to complaints — keeps components clean and focused
+ * on UI logic while this file owns the actual HTTP details.
  */
 
 import api from "./api";
 
 export const complaintService = {
+  getCategories: () => api.get("/complaints/meta/categories"),
   getStats: () => api.get("/complaints/stats"),
   getMyStats: () => api.get("/complaints/stats/me"),
   getMine: (params) => api.get("/complaints/mine", { params }),
+
+  // params: { page, limit, tab, search, sort }
   getAll: (params) => api.get("/complaints", { params }),
+
   getById: (id) => api.get(`/complaints/${id}`),
-  create: (data) => api.post("/complaints", data),
-  updateStatus: (id, status) => api.patch(`/complaints/${id}/status`, { status }),
+
+  // Builds multipart/form-data so image files can ride along with the
+  // rest of the complaint fields in one request.
+  create: (fields, files = []) => {
+    const formData = new FormData();
+    Object.entries(fields).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === "") return;
+      formData.append(key, typeof value === "object" ? JSON.stringify(value) : value);
+    });
+    files.forEach((file) => formData.append("images", file));
+
+    return api.post("/complaints", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  addComment: (id, message) => api.post(`/complaints/${id}/comments`, { message }),
+  reportIssue: (id, reason) => api.post(`/complaints/${id}/report`, { reason }),
+  updateStatus: (id, status, note) => api.patch(`/complaints/${id}/status`, { status, note }),
 };
