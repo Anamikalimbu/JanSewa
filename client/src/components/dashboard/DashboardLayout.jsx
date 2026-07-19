@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { notificationService } from "../../services/notificationService";
 
 // --- Minimal inline icon set (same stroke style used across the app) ---
@@ -22,16 +23,17 @@ const Icon = ({ d, size = 18, ...rest }) => (
 );
 
 const navItems = [
-  { to: "/home",             label: "Dashboard",         icon: "grid" },
-  { to: "/complaints",       label: "My Complaints",     icon: "list" },
-  { to: "/complaints/new",   label: "Submit Complaint",  icon: "plus" },
-  { to: "/notifications",    label: "Notifications",     icon: "bell", showBadge: true },
-  { to: "/profile",          label: "Profile",           icon: "user" },
-  { to: "/settings",         label: "Settings",          icon: "settings" },
+  { to: "/home",             labelKey: "nav_dashboard",        icon: "grid" },
+  { to: "/complaints",       labelKey: "nav_myComplaints",     icon: "list" },
+  { to: "/complaints/new",   labelKey: "nav_submitComplaint",  icon: "plus" },
+  { to: "/notifications",    labelKey: "nav_notifications",    icon: "bell", showBadge: true },
+  { to: "/profile",          labelKey: "nav_profile",          icon: "user" },
+  { to: "/settings",         labelKey: "nav_settings",         icon: "settings" },
 ];
 
 export default function DashboardLayout({ children }) {
   const { user, logout } = useAuth();
+  const { lang, toggleLang, t } = useLanguage();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -95,6 +97,20 @@ export default function DashboardLayout({ children }) {
         </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <button
+            onClick={toggleLang}
+            style={{
+              display: "flex", alignItems: "center", gap: 6, height: 32, padding: "0 10px",
+              borderRadius: 8, border: "1px solid var(--border)", background: "none",
+              fontSize: 12, fontWeight: 700, color: "var(--text-secondary)", cursor: "pointer",
+            }}
+            aria-label="Toggle language"
+          >
+            <span style={{ color: lang === "en" ? "var(--primary)" : "var(--text-muted)" }}>EN</span>
+            <span style={{ color: "var(--border)" }}>|</span>
+            <span style={{ color: lang === "ne" ? "var(--primary)" : "var(--text-muted)" }}>ने</span>
+          </button>
+
           <Link
             to="/notifications"
             style={{
@@ -160,7 +176,7 @@ export default function DashboardLayout({ children }) {
                     fontSize: 13, color: "var(--accent)", background: "none", border: "none", textAlign: "left",
                   }}
                 >
-                  <Icon d={iconPaths.logout} size={15} /> Logout
+                  <Icon d={iconPaths.logout} size={15} /> {t("logout")}
                 </button>
               </div>
             )}
@@ -176,7 +192,7 @@ export default function DashboardLayout({ children }) {
           padding: "18px 12px", boxSizing: "border-box",
         }}>
           <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {navItems.map(({ to, label, icon, showBadge }) => (
+            {navItems.map(({ to, labelKey, icon, showBadge }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -190,7 +206,7 @@ export default function DashboardLayout({ children }) {
                 })}
               >
                 <Icon d={iconPaths[icon]} size={17} />
-                <span style={{ flex: 1 }}>{label}</span>
+                <span style={{ flex: 1 }}>{t(labelKey)}</span>
                 {showBadge && unreadCount > 0 && (
                   <span style={{
                     background: "var(--secondary)", color: "#fff", fontSize: 10, fontWeight: 700,
@@ -212,7 +228,7 @@ export default function DashboardLayout({ children }) {
               }}
             >
               <Icon d={iconPaths.logout} size={17} />
-              Logout
+              {t("logout")}
             </button>
           </nav>
         </aside>
