@@ -1,7 +1,5 @@
 # JanSewa - AI-Powered Public Service Complaint Management Platform
 
-![JanSewa Logo](./client/public/images/logo.png)
-
 An intelligent complaint management system powered by AI (Google Gemini) that helps citizens report and track public service issues efficiently. JanSewa is a full-stack MERN application designed for streamlined complaint resolution.
 
 ---
