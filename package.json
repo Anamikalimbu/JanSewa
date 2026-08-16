@@ -1,8 +1,13 @@
 {
-  "dependencies": {
-    "@tailwindcss/vite": "^4.3.1",
-    "axios": "^1.18.1",
-    "react-router-dom": "^7.18.0",
-    "tailwindcss": "^4.3.1"
+  "name": "jansewa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JanSewa - AI-powered Public Service Complaint Management Platform",
+  "scripts": {
+    "install:all": "npm install --prefix client && npm install --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "start:server": "npm start --prefix server",
+    "build:client": "npm run build --prefix client"
   }
 }
