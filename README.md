@@ -659,7 +659,7 @@ vercel
 - [ ] MongoDB running (local or Atlas)
 - [ ] Backend running (`npm run dev:server`)
 - [ ] Frontend running (`npm run dev:client`)
-- [ ] Application accessible at http://localhost:5173
+- [ ] Application accessible at http://localhost:3000
 
 ---
 
