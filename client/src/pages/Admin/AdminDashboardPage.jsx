@@ -26,23 +26,20 @@ const ROLE_OPTIONS = [
 ];
 
 const StatCard = ({ label, value, loading }) => (
-  <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, padding: "18px 20px", textAlign: "center" }}>
+  <div className="bg-card border border-border rounded-xl p-4 md:p-5 text-center">
     {loading ? (
-      <div className="skeleton" style={{ width: 60, height: 30, margin: "0 auto 6px" }} />
+      <div className="skeleton w-[60px] h-[30px] mx-auto mb-1.5" />
     ) : (
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, color: "var(--text-primary)" }}>
+      <div className="font-display text-2xl md:text-[28px] font-bold text-text-primary">
         {value?.toLocaleString?.() ?? value}
       </div>
     )}
-    <div style={{ fontSize: 12.5, color: "var(--text-secondary)", marginTop: 4, fontWeight: 500 }}>{label}</div>
+    <div className="text-[12.5px] text-text-secondary mt-1 font-medium">{label}</div>
   </div>
 );
 
 const formatDate = (iso) =>
   new Date(iso).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
-
-const cardStyle = { background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20 };
-const sectionTitle = { fontSize: 15, fontWeight: 700, color: "var(--text-primary)" };
 
 export default function AdminDashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -96,33 +93,30 @@ export default function AdminDashboardPage() {
 
   return (
     <AdminLayout>
-      <div style={{
-        position: "relative", borderRadius: 14, overflow: "hidden", marginBottom: 20, height: 110,
-      }}>
+      <div className="relative rounded-2xl overflow-hidden mb-5 h-24 md:h-[110px]">
         <img
           src="https://images.unsplash.com/photo-1643576779741-7febf0b3a925?auto=format&fit=crop&w=1200&q=80"
           alt="Admin workspace"
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          className="w-full h-full object-cover block"
         />
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(90deg, rgba(0,51,51,0.85) 0%, rgba(0,51,51,0.4) 65%, rgba(0,51,51,0.1) 100%)",
-          display: "flex", alignItems: "center", padding: "0 24px",
-        }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "#fff" }}>
+        <div 
+          className="absolute inset-0 flex items-center px-4 md:px-6"
+          style={{ background: "linear-gradient(90deg, rgba(0,51,51,0.85) 0%, rgba(0,51,51,0.4) 65%, rgba(0,51,51,0.1) 100%)" }}
+        >
+          <div className="font-display text-xl md:text-[22px] font-bold text-white">
             Admin Dashboard
           </div>
         </div>
       </div>
 
       {error && (
-        <div style={{ background: "var(--accent-light)", color: "var(--accent)", borderRadius: 8, padding: "10px 14px", fontSize: 13, marginBottom: 18 }}>
+        <div className="bg-accent-light text-accent rounded-lg px-3.5 py-2.5 text-[13px] mb-4.5">
           {error}
         </div>
       )}
 
       {/* Stat cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 20 }}>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
         <StatCard label="Total Users" value={stats.totalUsers} loading={loading} />
         <StatCard label="Total Departments" value={departments.length} loading={loading} />
         <StatCard label="Total Complaints" value={stats.totalComplaints} loading={loading} />
@@ -130,22 +124,22 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Charts */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
-        <div style={cardStyle}>
-          <div style={{ ...sectionTitle, marginBottom: 16 }}>Complaint Analytics</div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <div className="bg-card border border-border rounded-xl p-5">
+          <div className="text-[15px] font-bold text-text-primary mb-4">Complaint Analytics</div>
           {loading ? (
-            <div className="skeleton" style={{ width: "100%", height: 140 }} />
+            <div className="skeleton w-full h-[140px]" />
           ) : donutData.length === 0 ? (
-            <div style={{ fontSize: 13, color: "var(--text-muted)" }}>No complaints yet.</div>
+            <div className="text-[13px] text-text-muted">No complaints yet.</div>
           ) : (
             <DonutChart data={donutData} />
           )}
         </div>
 
-        <div style={cardStyle}>
-          <div style={{ ...sectionTitle, marginBottom: 16 }}>Complaints Over Time</div>
+        <div className="bg-card border border-border rounded-xl p-5">
+          <div className="text-[15px] font-bold text-text-primary mb-4">Complaints Over Time</div>
           {loading ? (
-            <div className="skeleton" style={{ width: "100%", height: 160 }} />
+            <div className="skeleton w-full h-[160px]" />
           ) : (
             <BarChart data={series} />
           )}
@@ -153,47 +147,43 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Recent Complaints */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <div style={sectionTitle}>Recent Complaints</div>
-        <Link to="/admin/complaints" style={{ fontSize: 12.5, color: "var(--primary)", fontWeight: 600 }}>Manage Complaints →</Link>
+      <div className="flex justify-between items-center mb-3">
+        <div className="text-[15px] font-bold text-text-primary">Recent Complaints</div>
+        <Link to="/admin/complaints" className="text-[12.5px] text-primary font-semibold hover:underline">Manage Complaints →</Link>
       </div>
 
-      <div style={{ ...cardStyle, padding: 0, overflow: "hidden", marginBottom: 24 }}>
-        <div style={{
-          display: "flex", background: "var(--background)", padding: "10px 16px",
-          borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 700,
-          color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: 0.5, gap: 8,
-        }}>
-          <span style={{ width: 60 }}>ID</span>
-          <span style={{ flex: 2 }}>Title</span>
-          <span style={{ flex: 1.5 }}>Category</span>
-          <span style={{ flex: 1 }}>Priority</span>
-          <span style={{ flex: 1.5 }}>Status</span>
-          <span style={{ width: 60, textAlign: "right" }}>Action</span>
+      <div className="bg-card border border-border rounded-xl overflow-x-auto mb-6">
+        <div className="flex bg-background px-4 py-2.5 border-b border-border text-[11px] font-bold text-text-secondary uppercase tracking-wider gap-2 min-w-[700px]">
+          <span className="w-[60px]">ID</span>
+          <span className="flex-[2]">Title</span>
+          <span className="flex-[1.5]">Category</span>
+          <span className="flex-1">Priority</span>
+          <span className="flex-[1.5]">Status</span>
+          <span className="w-[60px] text-right">Action</span>
         </div>
 
         {loading ? (
           [0, 1, 2].map((i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", padding: "12px 16px", gap: 8, borderBottom: "1px solid var(--border)" }}>
-              <div className="skeleton" style={{ width: 60, height: 14 }} />
-              <div className="skeleton" style={{ flex: 2, height: 14 }} />
-              <div className="skeleton" style={{ flex: 1.5, height: 14 }} />
-              <div className="skeleton" style={{ flex: 1, height: 14 }} />
-              <div className="skeleton" style={{ flex: 1.5, height: 14 }} />
+            <div key={i} className="flex items-center px-4 py-3 gap-2 border-b border-border min-w-[700px]">
+              <div className="skeleton w-[60px] h-3.5" />
+              <div className="skeleton flex-[2] h-3.5" />
+              <div className="skeleton flex-[1.5] h-3.5" />
+              <div className="skeleton flex-1 h-3.5" />
+              <div className="skeleton flex-[1.5] h-3.5" />
             </div>
           ))
         ) : recentComplaints.length === 0 ? (
-          <div style={{ padding: "24px 16px", textAlign: "center", fontSize: 13, color: "var(--text-secondary)" }}>No complaints yet.</div>
+          <div className="px-4 py-6 text-center text-[13px] text-text-secondary">No complaints yet.</div>
         ) : (
           recentComplaints.map((c) => (
-            <div key={c._id || c.id} style={{ display: "flex", alignItems: "center", padding: "10px 16px", gap: 8, borderBottom: "1px solid var(--border)", fontSize: 13 }}>
-              <span style={{ width: 60, fontSize: 11, color: "var(--text-muted)" }}>#{c.code}</span>
-              <span style={{ flex: 2, fontWeight: 600, color: "var(--text-primary)" }}>{c.title}</span>
-              <span style={{ flex: 1.5, color: "var(--text-secondary)", fontSize: 12.5 }}>{c.category}</span>
-              <span style={{ flex: 1, color: "var(--text-secondary)", fontSize: 12.5 }}>{c.priority || "Medium"}</span>
-              <span style={{ flex: 1.5, fontSize: 11, fontWeight: 700, color: c.status === "Resolved" ? "#1e7a34" : "var(--secondary)" }}>{c.status}</span>
-              <span style={{ width: 60, textAlign: "right" }}>
-                <Link to={`/admin/complaints`} style={{ fontSize: 12, fontWeight: 700, color: "var(--primary)", border: "1px solid var(--border)", borderRadius: 6, padding: "4px 10px" }}>
+            <div key={c._id || c.id} className="flex items-center px-4 py-2.5 gap-2 border-b border-border text-[13px] min-w-[700px]">
+              <span className="w-[60px] text-[11px] text-text-muted">#{c.code}</span>
+              <span className="flex-[2] font-semibold text-text-primary truncate">{c.title}</span>
+              <span className="flex-[1.5] text-text-secondary text-[12.5px] truncate">{c.category}</span>
+              <span className="flex-1 text-text-secondary text-[12.5px]">{c.priority || "Medium"}</span>
+              <span className={`flex-[1.5] text-[11px] font-bold ${c.status === "Resolved" ? "text-[#1e7a34]" : "text-secondary"}`}>{c.status}</span>
+              <span className="w-[60px] text-right">
+                <Link to={`/admin/complaints`} className="text-[12px] font-bold text-primary border border-border rounded-md px-2.5 py-1 hover:bg-gray-50 transition-colors">
                   View
                 </Link>
               </span>
@@ -203,46 +193,42 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Departments Overview */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <div style={sectionTitle}>Departments Overview</div>
-        <Link to="/admin/departments" style={{ fontSize: 12.5, color: "var(--primary)", fontWeight: 600 }}>Manage →</Link>
+      <div className="flex justify-between items-center mb-3">
+        <div className="text-[15px] font-bold text-text-primary">Departments Overview</div>
+        <Link to="/admin/departments" className="text-[12.5px] text-primary font-semibold hover:underline">Manage →</Link>
       </div>
 
-      <div style={{ ...cardStyle, padding: 0, overflow: "hidden" }}>
-        <div style={{
-          display: "flex", background: "var(--background)", padding: "10px 16px",
-          borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 700,
-          color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: 0.5, gap: 8,
-        }}>
-          <span style={{ flex: 2 }}>Department</span>
-          <span style={{ flex: 1, textAlign: "center" }}>Staff</span>
-          <span style={{ flex: 1, textAlign: "center" }}>Assigned</span>
-          <span style={{ flex: 1, textAlign: "center" }}>Resolved</span>
-          <span style={{ flex: 1, textAlign: "center" }}>Pending</span>
+      <div className="bg-card border border-border rounded-xl overflow-x-auto">
+        <div className="flex bg-background px-4 py-2.5 border-b border-border text-[11px] font-bold text-text-secondary uppercase tracking-wider gap-2 min-w-[600px]">
+          <span className="flex-[2]">Department</span>
+          <span className="flex-1 text-center">Staff</span>
+          <span className="flex-1 text-center">Assigned</span>
+          <span className="flex-1 text-center">Resolved</span>
+          <span className="flex-1 text-center">Pending</span>
         </div>
 
         {loading ? (
           [0, 1, 2].map((i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", padding: "12px 16px", gap: 8, borderBottom: "1px solid var(--border)" }}>
-              <div className="skeleton" style={{ flex: 2, height: 14 }} />
-              <div className="skeleton" style={{ flex: 1, height: 14 }} />
-              <div className="skeleton" style={{ flex: 1, height: 14 }} />
-              <div className="skeleton" style={{ flex: 1, height: 14 }} />
-              <div className="skeleton" style={{ flex: 1, height: 14 }} />
+            <div key={i} className="flex items-center px-4 py-3 gap-2 border-b border-border min-w-[600px]">
+              <div className="skeleton flex-[2] h-3.5" />
+              <div className="skeleton flex-1 h-3.5" />
+              <div className="skeleton flex-1 h-3.5" />
+              <div className="skeleton flex-1 h-3.5" />
+              <div className="skeleton flex-1 h-3.5" />
             </div>
           ))
         ) : departments.length === 0 ? (
-          <div style={{ padding: "24px 16px", textAlign: "center", fontSize: 13, color: "var(--text-secondary)" }}>
-            No departments yet. <Link to="/admin/departments" style={{ color: "var(--primary)", fontWeight: 600 }}>Add one →</Link>
+          <div className="px-4 py-6 text-center text-[13px] text-text-secondary">
+            No departments yet. <Link to="/admin/departments" className="text-primary font-semibold hover:underline">Add one →</Link>
           </div>
         ) : (
           departments.map((d) => (
-            <div key={d.id} style={{ display: "flex", alignItems: "center", padding: "10px 16px", gap: 8, borderBottom: "1px solid var(--border)", fontSize: 13 }}>
-              <span style={{ flex: 2, fontWeight: 600, color: "var(--text-primary)" }}>{d.departmentName}</span>
-              <span style={{ flex: 1, textAlign: "center", color: "var(--text-secondary)" }}>{d.staff}</span>
-              <span style={{ flex: 1, textAlign: "center", color: "var(--text-secondary)" }}>{d.assigned}</span>
-              <span style={{ flex: 1, textAlign: "center", color: "#1e7a34", fontWeight: 600 }}>{d.resolved}</span>
-              <span style={{ flex: 1, textAlign: "center", color: "#8a6d00", fontWeight: 600 }}>{d.pending}</span>
+            <div key={d.id} className="flex items-center px-4 py-2.5 gap-2 border-b border-border text-[13px] min-w-[600px]">
+              <span className="flex-[2] font-semibold text-text-primary truncate">{d.departmentName}</span>
+              <span className="flex-1 text-center text-text-secondary">{d.staff}</span>
+              <span className="flex-1 text-center text-text-secondary">{d.assigned}</span>
+              <span className="flex-1 text-center text-[#1e7a34] font-semibold">{d.resolved}</span>
+              <span className="flex-1 text-center text-[#8a6d00] font-semibold">{d.pending}</span>
             </div>
           ))
         )}
