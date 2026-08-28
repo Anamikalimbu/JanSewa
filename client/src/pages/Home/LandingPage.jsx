@@ -307,7 +307,7 @@ const translations = {
       btn: "Get Started Free",
     },
     footer: {
-      copyright: "© 2025 JanSewa",
+      copyright: "© 2026JanSewa",
       links: "Privacy Policy · Terms of Service",
     },
   },
@@ -424,7 +424,7 @@ const translations = {
       btn: "नि:शुल्क सुरु गर्नुहोस्",
     },
     footer: {
-      copyright: "© २०२५ जनसेवा",
+      copyright: "© २०२६ जनसेवा",
       links: "गोपनीयता नीति · सेवाका सर्तहरू",
     },
   },
@@ -445,7 +445,7 @@ export default function LandingPage() {
   const [hoveredNav,   setHoveredNav]  = useState(null);
   const [hoveredSvc,   setHoveredSvc]  = useState(null);
   const [stats,        setStats]       = useState({
-    total: 12458, resolved: 8926, rate: 89, departments: 24,
+    total: 0, resolved: 0, rate: 0, departments: 5,
   });
   const [loading,      setLoading]     = useState(false);
 
