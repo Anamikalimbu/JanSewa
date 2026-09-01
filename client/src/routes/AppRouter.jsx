@@ -9,6 +9,7 @@ import MyComplaintsPage from "../pages/Complaints/MyComplaintsPage";
 import SubmitComplaintPage from "../pages/Complaints/SubmitComplaintPage";
 import ComplaintsMapPage from "../pages/Complaints/ComplaintsMapPage";
 import ComplaintDetailPage from "../pages/Complaints/ComplaintDetailPage";
+import TrackComplaintsPage from "../pages/Home/TrackComplaintsPage";
 import NotificationsPage from "../pages/Dashboard/NotificationsPage";
 import ProfilePage from "../pages/Profile/ProfilePage";
 import SettingsPage from "../pages/Profile/SettingsPage";
@@ -34,6 +35,7 @@ const AppRouter = () => (
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+      <Route path="/track" element={<TrackComplaintsPage />} />
       <Route path="/complaints" element={<MyComplaintsPage />} />
       <Route path="/complaints/new" element={<SubmitComplaintPage />} />
       <Route path="/map" element={<ComplaintsMapPage />} />

@@ -15,8 +15,6 @@ An intelligent complaint management system powered by AI (Google Gemini) that he
 - **Multi-language Support**: Support for multiple languages via context API
 - **Email Notifications**: Email alerts for complaint updates via Nodemailer
 - **Admin Dashboard**: Comprehensive admin dashboard for system management
-- **Chat Widget**: AI-powered chat support for users
-- **Rate Limiting**: Protection against abuse with express-rate-limit
 
 ---
 

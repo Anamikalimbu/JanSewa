@@ -40,6 +40,7 @@ const formatDate = (iso) =>
 
 const iconPaths = {
   search: "M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.35-4.35",
+  trash: "M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6",
 };
 const Icon = ({ d, size = 15 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
@@ -60,6 +61,17 @@ export default function MyComplaintsPage() {
   const [counts, setCounts] = useState({ total: 0, pending: 0, inProgress: 0, resolved: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this complaint?")) return;
+    try {
+      await complaintService.delete(id);
+      setComplaints(complaints.filter(c => c.id !== id));
+      setTotal(total - 1);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Couldn't delete complaint.");
+    }
+  };
 
   useEffect(() => {
     complaintService
@@ -174,7 +186,7 @@ export default function MyComplaintsPage() {
           <span style={{ flex: 2 }}>{t("myc_col_category")}</span>
           <span style={{ flex: 2 }}>{t("dash_col_status")}</span>
           <span style={{ flex: 2 }}>{t("myc_col_dateSubmitted")}</span>
-          <span style={{ width: 70, textAlign: "right" }}>{t("myc_col_action")}</span>
+          <span style={{ width: 100, textAlign: "right" }}>{t("myc_col_action")}</span>
         </div>
 
         {loading ? (
@@ -205,13 +217,22 @@ export default function MyComplaintsPage() {
               <span style={{ flex: 2, fontSize: 12.5, color: "var(--text-secondary)" }}>{c.category}</span>
               <span style={{ flex: 2 }}><StatusBadge status={c.status} t={t} /></span>
               <span style={{ flex: 2, fontSize: 12, color: "var(--text-secondary)" }}>{formatDate(c.createdAt)}</span>
-              <span style={{ width: 70, textAlign: "right" }}>
+              <span style={{ width: 100, textAlign: "right", display: "flex", justifyContent: "flex-end", gap: 6, alignItems: "center" }}>
                 <Link to={`/complaints/${c.id}`} style={{
                   fontSize: 12, fontWeight: 700, color: "var(--primary)", border: "1px solid var(--border)",
                   borderRadius: 6, padding: "4px 10px",
                 }}>
                   {t("view")}
                 </Link>
+                {c.status === "Pending" && (
+                  <button 
+                    onClick={() => handleDelete(c.id)} 
+                    style={{ background: "transparent", border: "none", color: "var(--accent)", cursor: "pointer", display: "flex", alignItems: "center" }}
+                    title="Delete Complaint"
+                  >
+                    <Icon d={iconPaths.trash} size={16} />
+                  </button>
+                )}
               </span>
             </div>
           ))

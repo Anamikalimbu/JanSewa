@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 //  mini icon 
 const Icon = ({ d, size = 24 }) => (
@@ -430,6 +430,85 @@ const translations = {
   },
 };
 
+function HeroSlider() {
+  const images = ["/images/hero.jpg", "/images/hero1.webp", "/images/hero2.jpg", "/images/hero3.jpg"];
+  const sliderRef = useRef(null);
+  const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+
+  const handleMouseDown = (e) => {
+    dragState.current.isDown = true;
+    dragState.current.startX = e.pageX - sliderRef.current.offsetLeft;
+    dragState.current.scrollLeft = sliderRef.current.scrollLeft;
+    sliderRef.current.style.scrollSnapType = 'none'; // disable snap while dragging
+    sliderRef.current.style.cursor = 'grabbing';
+  };
+  const handleMouseLeave = () => {
+    if (!dragState.current.isDown) return;
+    dragState.current.isDown = false;
+    sliderRef.current.style.scrollSnapType = 'x mandatory';
+    sliderRef.current.style.cursor = 'grab';
+  };
+  const handleMouseUp = () => {
+    if (!dragState.current.isDown) return;
+    dragState.current.isDown = false;
+    sliderRef.current.style.scrollSnapType = 'x mandatory';
+    sliderRef.current.style.cursor = 'grab';
+  };
+  const handleMouseMove = (e) => {
+    if (!dragState.current.isDown) return;
+    e.preventDefault();
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const walk = (x - dragState.current.startX) * 2; // scroll-fast
+    sliderRef.current.scrollLeft = dragState.current.scrollLeft - walk;
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (sliderRef.current && !dragState.current.isDown) {
+        const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          sliderRef.current.scrollTo({ left: scrollLeft + clientWidth, behavior: 'smooth' });
+        }
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <>
+      <div 
+        ref={sliderRef}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        style={{
+          position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0,
+          display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", 
+          scrollBehavior: "smooth", scrollbarWidth: "none", WebkitOverflowScrolling: "touch",
+          cursor: "grab"
+        }}
+      >
+        <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+        {images.map((src, i) => (
+          <div key={i} className="hide-scrollbar" style={{
+            flex: "0 0 100%", height: "100%", scrollSnapAlign: "start",
+            backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center",
+            pointerEvents: "none" // prevents images from being dragged natively
+          }} />
+        ))}
+      </div>
+      <div style={{ 
+        position: "absolute", top: 0, left: 0, width: "100%", height: "100%", 
+        background: "linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)", 
+        pointerEvents: "none", zIndex: 1 
+      }} />
+    </>
+  );
+}
+
 export default function LandingPage() {
   const [lang, setLang] = useState(() => {
     try { return localStorage.getItem("jansewa_lang") || "en"; } catch { return "en"; }
@@ -494,15 +573,6 @@ export default function LandingPage() {
         display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <a href="https://www.facebook.com/" style={{ display: "flex", alignItems: "center", color: "inherit" }} aria-label="Facebook">
-            <Icon d={icons.facebook} size={14} />
-          </a>
-          <a href="https://x.com/" style={{ display: "flex", alignItems: "center", color: "inherit" }} aria-label="X">
-            <Icon d={icons.twitter} size={14} />
-          </a>
-          <a href="tel:1111" style={{ display: "flex", alignItems: "center", gap: 5, color: "inherit" }}>
-            <Icon d={icons.phone} size={13} /> 1111
-          </a>
           <a href="mailto:support@jansewa.gov.np" style={{ display: "flex", alignItems: "center", gap: 5, color: "inherit" }}>
             <Icon d={icons.mail} size={13} /> support@jansewa.gov.np
           </a>
@@ -524,8 +594,8 @@ export default function LandingPage() {
         position: "sticky", top: 0, zIndex: 100, width: "100%",
         background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--border)",
-        padding: "0 32px", height: 56, boxSizing: "border-box",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "12px 24px", minHeight: 60, boxSizing: "border-box",
+        display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16
       }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -540,7 +610,7 @@ export default function LandingPage() {
         </div>
 
         {/* Desktop nav */}
-        <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px 24px", alignItems: "center" }}>
           {navLinks.map(({ key, label, href }) => (
             <a key={key} href={href}
               onClick={e => { e.preventDefault(); scrollTo(href); }}
@@ -567,71 +637,61 @@ export default function LandingPage() {
       {/*  HERO  */}
       <section id="home" style={{
         width: "100%", boxSizing: "border-box",
-        background: "linear-gradient(135deg, rgba(0,128,128,0.08) 0%, rgba(0,102,102,0.06) 50%, rgba(255,193,7,0.06) 100%)",
-        padding: "72px 32px 56px", position: "relative", overflow: "hidden",
+        position: "relative", overflow: "hidden", minHeight: "85vh",
+        display: "flex", alignItems: "center"
       }}>
-        {/* decorative blobs */}
-        <div style={{ position: "absolute", top: -60, right: -60, width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(77,182,182,0.18), transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -40, left: -40, width: 240, height: 240, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,193,7,0.14), transparent 70%)", pointerEvents: "none" }} />
-
+        <HeroSlider />
         <div style={{
-          position: "relative", maxWidth: 1180, margin: "0 auto",
-          display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 40, alignItems: "center",
+          position: "relative", zIndex: 2, width: "100%", maxWidth: 1180, margin: "0 auto",
+          padding: "60px 24px", boxSizing: "border-box", textAlign: "left",
+          pointerEvents: "none"
         }}>
-          {/* Left — copy */}
-          <div style={{ textAlign: "left" }}>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              background: "rgba(0,128,128,0.08)", borderRadius: 20, padding: "4px 14px",
-              fontSize: 12, fontWeight: 600, color: "var(--primary)", marginBottom: 20,
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--primary-Light)", display: "inline-block" }} />
-              {t.hero.badge}
-            </div>
-
-            <h1 style={{
-              fontFamily: "var(--font-display)", fontSize: 38, fontWeight: 800,
-              color: "var(--text-primary)", lineHeight: 1.25, letterSpacing: -0.8, marginBottom: 16,
-              maxWidth: 560,
-            }}>
-              {t.hero.titleMain}{" "}
-              <span style={{ color: "var(--primary)" }}>{t.hero.titleHighlight}</span>
-            </h1>
-
-            <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 32, maxWidth: 480 }}>
-              {t.hero.sub}
-            </p>
-
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <a href="/submit" style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "var(--primary)", color: "#fff",
-                padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
-                boxShadow: "0 4px 14px rgba(0,128,128,0.4)", transition: "transform 0.15s",
-              }}>
-                {t.hero.submit} <Icon d={icons.arrow} size={18} />
-              </a>
-              <a href="/track" style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "var(--card)", color: "var(--text-primary)",
-                padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
-                border: "1.5px solid var(--border)",
-              }}>
-                {t.hero.track}
-              </a>
-            </div>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", borderRadius: 20, padding: "4px 14px",
+            fontSize: 12, fontWeight: 600, color: "#fff", marginBottom: 20, border: "1px solid rgba(255,255,255,0.2)"
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
+            {t.hero.badge}
           </div>
 
-          {/* Right — illustration */}
-          <div style={{ position: "relative" }}>
-            <HeroIllustration />
+          <h1 style={{
+            fontFamily: "var(--font-display)", fontSize: "clamp(32px, 6vw, 56px)", fontWeight: 800,
+            color: "#fff", lineHeight: 1.15, letterSpacing: -0.8, marginBottom: 16,
+            maxWidth: 600,
+          }}>
+            {t.hero.titleMain}{" "}
+            <span style={{ color: "#4ade80" }}>{t.hero.titleHighlight}</span>
+          </h1>
+
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", lineHeight: 1.6, marginBottom: 32, maxWidth: 500 }}>
+            {t.hero.sub}
+          </p>
+
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", pointerEvents: "auto" }}>
+            <a href="/complaints/new" style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "var(--primary)", color: "#fff",
+              padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
+              boxShadow: "0 4px 14px rgba(0,0,0,0.4)", transition: "transform 0.15s",
+            }}>
+              {t.hero.submit} <Icon d={icons.arrow} size={18} />
+            </a>
+            <a href="/track" style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "rgba(255,255,255,0.1)", color: "#fff",
+              padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
+              border: "1.5px solid rgba(255,255,255,0.3)", backdropFilter: "blur(4px)"
+            }}>
+              {t.hero.track}
+            </a>
           </div>
         </div>
       </section>
       {/*  STATS  */}
       <section style={{
         background: "var(--card)", borderBottom: "1px solid var(--border)",
-        width: "100%", boxSizing: "border-box", padding: "36px 32px",
+        width: "100%", boxSizing: "border-box", padding: "36px 24px",
       }}>
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--primary)", textTransform: "uppercase" }}>
@@ -644,7 +704,7 @@ export default function LandingPage() {
             {t.stats.sub}
           </p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
           {complaintStatKeys.map((key) => (
             <div key={key} style={{
               border: "1px solid var(--border)", borderRadius: 12, padding: "16px 12px",
@@ -677,7 +737,7 @@ export default function LandingPage() {
         <div style={{ marginTop: 52, marginBottom: 28 }}>
           <SectionHeading label={t.howItWorks.eyebrow} title={t.howItWorks.title} />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 52 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 52 }}>
           {t.howItWorks.steps.map(({ title, desc }, i) => (
             <div key={title} style={{
               background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14,
@@ -732,7 +792,7 @@ export default function LandingPage() {
 
         {/*  DEPARTMENTS  */}
         <SectionHeading label={t.departments.eyebrow} title={t.departments.title} sub={t.departments.sub} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 52 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 52 }}>
           {deptKeys.map((key, i) => (
             <div key={key}
               onMouseEnter={() => setHoveredDept(key)}
@@ -762,7 +822,7 @@ export default function LandingPage() {
             title={t.services.title}
             sub={t.services.sub}
           />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 52 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 52 }}>
             {t.services.items.map(({ title, tag, desc }, i) => (
               <div key={title}
                 onMouseEnter={() => setHoveredSvc(title)}
@@ -798,7 +858,7 @@ export default function LandingPage() {
           <SectionHeading label={t.about.eyebrow} title={t.about.title} />
 
           {/* mission + values */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 36, marginBottom: 44, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 36, marginBottom: 44, alignItems: "start" }}>
             {/* left: narrative */}
             <div style={{ textAlign: "left" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)", marginBottom: 14, letterSpacing: -0.5 }}>
@@ -830,7 +890,7 @@ export default function LandingPage() {
                   border: "1px solid var(--border)", marginBottom: 12, display: "block",
                 }}
               />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
                 {t.about.values.map(({ title, desc }, i) => (
                   <div key={title} style={{
                     background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12,
@@ -929,7 +989,7 @@ export default function LandingPage() {
             sub={t.contact.sub}
           />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginBottom: 52 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 28, marginBottom: 52 }}>
             {/* contact info */}
             <div style={{ textAlign: "left" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "var(--text-primary)", marginBottom: 10 }}>{t.contact.talkTitle}</h3>
@@ -962,7 +1022,7 @@ export default function LandingPage() {
             }}>
               <form onSubmit={handleFormSubmit} noValidate>
                 {/* name + email row */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 12 }}>
                   {[
                     { name: "name",  label: t.contact.form.name,  type: "text",  placeholder: t.contact.form.namePh },
                     { name: "email", label: t.contact.form.email, type: "email", placeholder: t.contact.form.emailPh },

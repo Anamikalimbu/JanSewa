@@ -92,6 +92,16 @@ export default function ComplaintDetailPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this complaint? This cannot be undone.")) return;
+    try {
+      await complaintService.delete(id);
+      navigate("/complaints");
+    } catch (err) {
+      setError(err?.response?.data?.message || "Couldn't delete this complaint.");
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -121,9 +131,19 @@ export default function ComplaintDetailPage() {
 
   return (
     <DashboardLayout>
-      <Link to="/complaints" style={{ fontSize: 12.5, color: "var(--primary)", fontWeight: 600, display: "inline-block", marginBottom: 10 }}>
-        ← {t("detail_back")}
-      </Link>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <Link to="/complaints" style={{ fontSize: 12.5, color: "var(--primary)", fontWeight: 600 }}>
+          ← {t("detail_back")}
+        </Link>
+        {complaint.status === "Pending" && (
+          <button 
+            onClick={handleDelete} 
+            style={{ background: "var(--accent-light)", color: "var(--accent)", border: "1px solid var(--accent)", padding: "4px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+          >
+            {t("Delete")}
+          </button>
+        )}
+      </div>
       <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)", marginBottom: 18 }}>
         {t("detail_title")}
       </div>
