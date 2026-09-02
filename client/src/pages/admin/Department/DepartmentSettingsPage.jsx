@@ -3,7 +3,6 @@
  * Password change + notification preferences for department staff.
  */
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import DepartmentLayout from "../../../layouts/DepartmentLayout";
 import { SettingsIllustration } from "../../../components/common/Illustrations";
 import { useAuth } from "../../../context/AuthContext";
@@ -55,12 +54,7 @@ const PREF_KEY = "jansewa_dept_prefs";
 const defaultPrefs = { newAssignment: true, dailySummary: false };
 
 export default function DepartmentSettingsPage() {
-  const { user, loading: authLoading, changePassword } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== "department")) navigate("/home");
-  }, [authLoading, user, navigate]);
+  const { changePassword } = useAuth();
 
   const [prefs, setPrefs] = useState(defaultPrefs);
   useEffect(() => {
@@ -106,8 +100,6 @@ export default function DepartmentSettingsPage() {
     outline: "none", boxSizing: "border-box", fontFamily: "var(--font-body)", marginBottom: 12,
   };
   const labelStyle = { display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 };
-
-  if (authLoading || !user || user.role !== "department") return null;
 
   return (
     <DepartmentLayout>

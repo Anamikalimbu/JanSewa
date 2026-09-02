@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 //  mini icon 
 const Icon = ({ d, size = 24 }) => (
@@ -98,8 +98,6 @@ const icons = {
   sms:         "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z",
   building:    "M5 21V7l7-4 7 4v14M3 21h18M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01",
   clock:       "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
-  menu:        "M3 12h18M3 6h18M3 18h18",
-  close:       "M18 6L6 18M6 6l12 12",
 };
 
 //  animated counter 
@@ -174,8 +172,8 @@ const channelValues = {
   phone: "1111", sms: "+977-98XXXXXXXX", whatsapp: "+977-98XXXXXXXX",
 };
 
-const complaintStatKeys = ["total", "seen", "processing", "unseen", "solved", "closed"];
-const complaintStatIcons = { total: "doc", seen: "eye", processing: "chart", unseen: "bell", solved: "resolved", closed: "shield" };
+const complaintStatKeys = ["total", "resolved", "rate", "departments"];
+const complaintStatIcons = { total: "doc", resolved: "resolved", rate: "chart", departments: "building" };
 
 const contactIcons = ["mail", "phone", "pin", "github"];
 
@@ -200,17 +198,12 @@ const translations = {
   en: {
     dir: "ltr",
     topbar: { phone: "1111", email: "support@jansewa.gov.np" },
-    header: {
-      govName: "Local Government of Dharan",
-      subtitle: "Municipal Complaint & Grievance Portal",
-      address: "Dharan, Sunsari District, Koshi Province, Nepal",
-    },
     nav: { home: "Home", services: "Services", about: "About Us", contact: "Contact", login: "Login", register: "Register" },
     hero: {
       badge: "AI-Powered Public Service Platform for Nepal",
-      titleMain: "Do you have any inquiries, complaints, or suggestions regarding public services?",
-      titleHighlight: "Share it with JanSewa we're ready to help.",
-      sub: "Let us know we're here to resolve it. Every complaint is reviewed, routed to the responsible office, and tracked until it's closed.",
+      titleMain: "We're Here to",
+      titleHighlight: "Solve Together",
+      sub: "Report issues, track progress and help build a better community.",
       submit: "Submit Complaint",
       track: "Track Complaint",
     },
@@ -227,11 +220,9 @@ const translations = {
     },
     complaintStats: {
       total:      { label: "Total Complaints", desc: "A complaint has been registered on the portal." },
-      seen:       { label: "Seen",             desc: "The relevant department has reviewed the complaint." },
-      processing: { label: "Processing",       desc: "The relevant department is investigating the complaint." },
-      unseen:     { label: "Unseen",           desc: "The relevant department has not yet addressed the complaint." },
-      solved:     { label: "Solved",           desc: "The complaint has been resolved by the office." },
-      closed:     { label: "Closed",           desc: "The relevant authority has closed the complaint." },
+      resolved:   { label: "Resolved",         desc: "Issues successfully solved." },
+      rate:       { label: "Resolution Rate",  desc: "Percentage of solved issues." },
+      departments:{ label: "Departments",      desc: "Available service departments." },
     },
     howItWorks: {
       eyebrow: "Process", title: "How It Works", stepLabel: "STEP",
@@ -250,10 +241,10 @@ const translations = {
       title: "Offices with the Most Complaints Received",
       sub: "Monitoring the offices with the most complaints to improve service and transparency",
       names: [
-        "Ward Office, Itahari-3",
+        "Ward Office, Dharan-3",
         "Water Supply & Sanitation Office",
         "Roads Division Office, Sunsari",
-        "Nepal Electricity Authority, Itahari",
+        "Nepal Electricity Authority, Dharan",
         "District Health Office, Sunsari",
       ],
     },
@@ -296,7 +287,7 @@ const translations = {
       items: [
         { title: "Email",   lines: ["hello@jansewa.gov.np", "support@jansewa.gov.np"] },
         { title: "Phone",   lines: ["+977-1-4XXXXXX (Office)", "Mon-Fri, 10 am - 5 pm NST"] },
-        { title: "Address", lines: ["Itahari, Sunsari District", "Koshi Province, Nepal"] },
+        { title: "Address", lines: ["Dharan, Sunsari District", "Koshi Province, Nepal"] },
         { title: "GitHub",  lines: ["https://github.com/Divya-Bhandari/JanSewa"] },
       ],
       form: {
@@ -316,7 +307,7 @@ const translations = {
       btn: "Get Started Free",
     },
     footer: {
-      copyright: "© 2025 JanSewa",
+      copyright: "© 2026JanSewa",
       links: "Privacy Policy · Terms of Service",
     },
   },
@@ -324,17 +315,12 @@ const translations = {
   ne: {
     dir: "ltr",
     topbar: { phone: "1111", email: "support@jansewa.gov.np" },
-    header: {
-      govName: "धरान स्थानीय सरकार",
-      subtitle: "नगरपालिका उजुरी तथा गुनासो पोर्टल",
-      address: "धरान, सुनसरी जिल्ला, कोशी प्रदेश, नेपाल",
-    },
     nav: { home: "गृहपृष्ठ", services: "सेवाहरू", about: "हाम्रो बारे", contact: "सम्पर्क", login: "लगइन", register: "दर्ता गर्नुहोस्" },
     hero: {
       badge: "नेपालका लागि एआई-संचालित सार्वजनिक सेवा प्लेटफर्म",
-      titleMain: "के तपाईंसँग सार्वजनिक सेवासम्बन्धी कुनै जिज्ञासा, उजुरी वा सुझाव छ?",
-      titleHighlight: "जनसेवामा साझा गर्नुहोस् हामी सहयोग गर्न तयार छौं।",
-      sub: "हामीलाई जानकारी दिनुहोस् हामी यसलाई समाधान गर्न यहाँ छौं। हरेक उजुरी समीक्षा गरिन्छ, सम्बन्धित कार्यालयमा पठाइन्छ, र बन्द नभएसम्म ट्र्याक गरिन्छ।",
+      titleMain: "We're Here to",
+      titleHighlight: "Solve Together",
+      sub: "Report issues, track progress and help build a better community.",
       submit: "उजुरी दर्ता गर्नुहोस्",
       track: "उजुरी ट्र्याक गर्नुहोस्",
     },
@@ -351,11 +337,9 @@ const translations = {
     },
     complaintStats: {
       total:      { label: "कुल उजुरीहरू",  desc: "पोर्टलमा उजुरी दर्ता भएको छ।" },
-      seen:       { label: "हेरिएको",        desc: "सम्बन्धित विभागले उजुरी समीक्षा गरेको छ।" },
-      processing: { label: "प्रक्रियामा",    desc: "सम्बन्धित विभागले उजुरी अनुसन्धान गरिरहेको छ।" },
-      unseen:     { label: "नहेरिएको",       desc: "सम्बन्धित विभागले उजुरी अझै सम्बोधन गरेको छैन।" },
-      solved:     { label: "समाधान भएको",   desc: "कार्यालयद्वारा उजुरी समाधान गरिएको छ।" },
-      closed:     { label: "बन्द भएको",     desc: "सम्बन्धित निकायले उजुरी बन्द गरेको छ।" },
+      resolved:   { label: "समाधान भएको",   desc: "कार्यालयद्वारा उजुरी समाधान गरिएको छ।" },
+      rate:       { label: "समाधान दर",     desc: "समस्या समाधानको प्रतिशत।" },
+      departments:{ label: "विभागहरू",     desc: "उपलब्ध सेवा विभागहरू।" },
     },
     howItWorks: {
       eyebrow: "प्रक्रिया", title: "यसरी काम गर्छ", stepLabel: "चरण",
@@ -374,10 +358,10 @@ const translations = {
       title: "सबैभन्दा बढी उजुरी प्राप्त गर्ने कार्यालयहरू",
       sub: "सेवा र पारदर्शिता सुधार गर्न सबैभन्दा बढी उजुरी भएका कार्यालयहरूको अनुगमन गरिन्छ",
       names: [
-        "वडा कार्यालय, इटहरी-३",
+        "वडा कार्यालय, धरान-३",
         "खानेपानी तथा सरसफाइ कार्यालय",
         "सडक डिभिजन कार्यालय, सुनसरी",
-        "नेपाल विद्युत प्राधिकरण, इटहरी",
+        "नेपाल विद्युत प्राधिकरण, धरान",
         "जिल्ला स्वास्थ्य कार्यालय, सुनसरी",
       ],
     },
@@ -420,7 +404,7 @@ const translations = {
       items: [
         { title: "इमेल",   lines: ["hello@jansewa.gov.np", "support@jansewa.gov.np"] },
         { title: "फोन",   lines: ["+977-1-4XXXXXX (कार्यालय)", "सोम-शुक्र, बिहान १० - बेलुका ५ बजे (NST)"] },
-        { title: "ठेगाना", lines: ["इटहरी, सुनसरी जिल्ला", "कोशी प्रदेश, नेपाल"] },
+        { title: "ठेगाना", lines: ["धरान, सुनसरी जिल्ला", "कोशी प्रदेश, नेपाल"] },
         { title: "गिटहब",  lines: ["https://github.com/Divya-Bhandari/JanSewa"] },
       ],
       form: {
@@ -440,11 +424,90 @@ const translations = {
       btn: "नि:शुल्क सुरु गर्नुहोस्",
     },
     footer: {
-      copyright: "© २०२५ जनसेवा",
+      copyright: "© २०२६ जनसेवा",
       links: "गोपनीयता नीति · सेवाका सर्तहरू",
     },
   },
 };
+
+function HeroSlider() {
+  const images = ["/images/hero.jpg", "/images/hero1.webp", "/images/hero2.jpg", "/images/hero3.jpg"];
+  const sliderRef = useRef(null);
+  const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+
+  const handleMouseDown = (e) => {
+    dragState.current.isDown = true;
+    dragState.current.startX = e.pageX - sliderRef.current.offsetLeft;
+    dragState.current.scrollLeft = sliderRef.current.scrollLeft;
+    sliderRef.current.style.scrollSnapType = 'none'; // disable snap while dragging
+    sliderRef.current.style.cursor = 'grabbing';
+  };
+  const handleMouseLeave = () => {
+    if (!dragState.current.isDown) return;
+    dragState.current.isDown = false;
+    sliderRef.current.style.scrollSnapType = 'x mandatory';
+    sliderRef.current.style.cursor = 'grab';
+  };
+  const handleMouseUp = () => {
+    if (!dragState.current.isDown) return;
+    dragState.current.isDown = false;
+    sliderRef.current.style.scrollSnapType = 'x mandatory';
+    sliderRef.current.style.cursor = 'grab';
+  };
+  const handleMouseMove = (e) => {
+    if (!dragState.current.isDown) return;
+    e.preventDefault();
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const walk = (x - dragState.current.startX) * 2; // scroll-fast
+    sliderRef.current.scrollLeft = dragState.current.scrollLeft - walk;
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (sliderRef.current && !dragState.current.isDown) {
+        const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          sliderRef.current.scrollTo({ left: scrollLeft + clientWidth, behavior: 'smooth' });
+        }
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <>
+      <div 
+        ref={sliderRef}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        style={{
+          position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0,
+          display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", 
+          scrollBehavior: "smooth", scrollbarWidth: "none", WebkitOverflowScrolling: "touch",
+          cursor: "grab"
+        }}
+      >
+        <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+        {images.map((src, i) => (
+          <div key={i} className="hide-scrollbar" style={{
+            flex: "0 0 100%", height: "100%", scrollSnapAlign: "start",
+            backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center",
+            pointerEvents: "none" // prevents images from being dragged natively
+          }} />
+        ))}
+      </div>
+      <div style={{ 
+        position: "absolute", top: 0, left: 0, width: "100%", height: "100%", 
+        background: "linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)", 
+        pointerEvents: "none", zIndex: 1 
+      }} />
+    </>
+  );
+}
 
 export default function LandingPage() {
   const [lang, setLang] = useState(() => {
@@ -460,27 +523,10 @@ export default function LandingPage() {
   const [hoveredDept,  setHoveredDept] = useState(null);
   const [hoveredNav,   setHoveredNav]  = useState(null);
   const [hoveredSvc,   setHoveredSvc]  = useState(null);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [stats,        setStats]       = useState({
-    total: 0, seen: 0, processing: 0, unseen: 0, solved: 0, closed: 0, departments: 8,
+    total: 0, resolved: 0, rate: 0, departments: 5,
   });
-  const [loading,      setLoading]     = useState(true);
-
-  // No public (pre-login) stats endpoint exists on the backend yet — the
-  // authenticated /admin/stats route can't be called from this page.
-  // Populate with realistic, proportionally-consistent placeholder figures
-  // so the section isn't stuck at zero; swap for a real fetch once a public
-  // stats endpoint is added.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setStats({
-        total: 12458, seen: 11960, processing: 1874, unseen: 498,
-        solved: 8926, closed: 8214, departments: 24,
-      });
-      setLoading(false);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, []);
+  const [loading,      setLoading]     = useState(false);
 
   // contact form state
   const [form,       setForm]       = useState({ name: "", email: "", subject: "", message: "" });
@@ -527,15 +573,6 @@ export default function LandingPage() {
         display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <a href="https://www.facebook.com/" style={{ display: "flex", alignItems: "center", color: "inherit" }} aria-label="Facebook">
-            <Icon d={icons.facebook} size={14} />
-          </a>
-          <a href="https://x.com/" style={{ display: "flex", alignItems: "center", color: "inherit" }} aria-label="X">
-            <Icon d={icons.twitter} size={14} />
-          </a>
-          <a href="tel:1111" style={{ display: "flex", alignItems: "center", gap: 5, color: "inherit" }}>
-            <Icon d={icons.phone} size={13} /> 1111
-          </a>
           <a href="mailto:support@jansewa.gov.np" style={{ display: "flex", alignItems: "center", gap: 5, color: "inherit" }}>
             <Icon d={icons.mail} size={13} /> support@jansewa.gov.np
           </a>
@@ -557,8 +594,8 @@ export default function LandingPage() {
         position: "sticky", top: 0, zIndex: 100, width: "100%",
         background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--border)",
-        padding: "0 32px", height: 56, boxSizing: "border-box",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "12px 24px", minHeight: 60, boxSizing: "border-box",
+        display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16
       }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -573,7 +610,7 @@ export default function LandingPage() {
         </div>
 
         {/* Desktop nav */}
-        <div className="landing-desktop-nav" style={{ display: "flex", gap: 28, alignItems: "center" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px 24px", alignItems: "center" }}>
           {navLinks.map(({ key, label, href }) => (
             <a key={key} href={href}
               onClick={e => { e.preventDefault(); scrollTo(href); }}
@@ -595,162 +632,66 @@ export default function LandingPage() {
             boxShadow: "0 1px 4px rgba(0,128,128,0.3)",
           }}>{t.nav.register}</a>
         </div>
-
-        {/* Mobile hamburger */}
-        <button
-          className="app-hamburger"
-          onClick={() => setMobileNavOpen((o) => !o)}
-          aria-label="Toggle menu"
-        >
-          <Icon d={mobileNavOpen ? icons.close : icons.menu} size={20} />
-        </button>
       </nav>
-
-      {/* Mobile nav panel */}
-      {mobileNavOpen && (
-        <div className="landing-mobile-panel" style={{
-          flexDirection: "column", position: "sticky", top: 56, zIndex: 99,
-          background: "var(--card)", borderBottom: "1px solid var(--border)",
-          padding: "12px 20px 18px", boxShadow: "0 8px 20px rgba(15,23,42,0.08)",
-        }}>
-          {navLinks.map(({ key, label, href }) => (
-            <a key={key} href={href}
-              onClick={e => { e.preventDefault(); scrollTo(href); setMobileNavOpen(false); }}
-              style={{ padding: "10px 0", fontSize: 14.5, fontWeight: 500, color: "var(--text-secondary)", borderBottom: "1px solid var(--border)" }}
-            >{label}</a>
-          ))}
-          <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-            <a href="/login" style={{
-              flex: 1, textAlign: "center", fontSize: 13.5, fontWeight: 600, padding: "10px 0", borderRadius: 8,
-              border: "1.5px solid var(--primary)", color: "var(--primary)",
-            }}>{t.nav.login}</a>
-            <a href="/register" style={{
-              flex: 1, textAlign: "center", fontSize: 13.5, fontWeight: 600, padding: "10px 0", borderRadius: 8,
-              background: "var(--primary)", color: "#fff",
-            }}>{t.nav.register}</a>
-          </div>
-        </div>
-      )}
 
       {/*  HERO  */}
       <section id="home" style={{
         width: "100%", boxSizing: "border-box",
-        background: "linear-gradient(135deg, rgba(0,128,128,0.08) 0%, rgba(0,102,102,0.06) 50%, rgba(255,193,7,0.06) 100%)",
-        padding: "72px 32px 56px", position: "relative", overflow: "hidden",
+        position: "relative", overflow: "hidden", minHeight: "85vh",
+        display: "flex", alignItems: "center"
       }}>
-        {/* decorative blobs */}
-        <div style={{ position: "absolute", top: -60, right: -60, width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(77,182,182,0.18), transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -40, left: -40, width: 240, height: 240, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,193,7,0.14), transparent 70%)", pointerEvents: "none" }} />
-
+        <HeroSlider />
         <div style={{
-          position: "relative", maxWidth: 1180, margin: "0 auto",
-          display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 40, alignItems: "center",
+          position: "relative", zIndex: 2, width: "100%", maxWidth: 1180, margin: "0 auto",
+          padding: "60px 24px", boxSizing: "border-box", textAlign: "left",
+          pointerEvents: "none"
         }}>
-          {/* Left — copy */}
-          <div style={{ textAlign: "left" }}>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              background: "rgba(0,128,128,0.08)", borderRadius: 20, padding: "4px 14px",
-              fontSize: 12, fontWeight: 600, color: "var(--primary)", marginBottom: 20,
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--primary-Light)", display: "inline-block" }} />
-              {t.hero.badge}
-            </div>
-
-            <h1 style={{
-              fontFamily: "var(--font-display)", fontSize: 38, fontWeight: 800,
-              color: "var(--text-primary)", lineHeight: 1.25, letterSpacing: -0.8, marginBottom: 16,
-              maxWidth: 560,
-            }}>
-              {t.hero.titleMain}{" "}
-              <span style={{ color: "var(--primary)" }}>{t.hero.titleHighlight}</span>
-            </h1>
-
-            <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 32, maxWidth: 480 }}>
-              {t.hero.sub}
-            </p>
-
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <a href="/submit" style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "var(--primary)", color: "#fff",
-                padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
-                boxShadow: "0 4px 14px rgba(0,128,128,0.4)", transition: "transform 0.15s",
-              }}>
-                {t.hero.submit} <Icon d={icons.arrow} size={18} />
-              </a>
-              <a href="/track" style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "var(--card)", color: "var(--text-primary)",
-                padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
-                border: "1.5px solid var(--border)",
-              }}>
-                {t.hero.track}
-              </a>
-            </div>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", borderRadius: 20, padding: "4px 14px",
+            fontSize: 12, fontWeight: 600, color: "#fff", marginBottom: 20, border: "1px solid rgba(255,255,255,0.2)"
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
+            {t.hero.badge}
           </div>
 
-          {/* Right — illustration */}
-          <div style={{ position: "relative" }}>
-            <HeroIllustration />
-          </div>
-        </div>
-      </section>
+          <h1 style={{
+            fontFamily: "var(--font-display)", fontSize: "clamp(32px, 6vw, 56px)", fontWeight: 800,
+            color: "#fff", lineHeight: 1.15, letterSpacing: -0.8, marginBottom: 16,
+            maxWidth: 600,
+          }}>
+            {t.hero.titleMain}{" "}
+            <span style={{ color: "#4ade80" }}>{t.hero.titleHighlight}</span>
+          </h1>
 
-      {/*  TRUSTED-BY STRIP  */}
-      <section style={{
-        width: "100%", boxSizing: "border-box", padding: "20px 32px",
-        background: "var(--card)", borderBottom: "1px solid var(--border)",
-        display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap",
-      }}>
-        <img src="/images/emblem-of-nepal-sm.png" alt="Government of Nepal" style={{ width: 30, height: 30, objectFit: "contain", opacity: 0.85 }} />
-        <span style={{ fontSize: 12.5, color: "var(--text-muted)", fontWeight: 600 }}>
-          {t.trustedBy}
-        </span>
-      </section>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", lineHeight: 1.6, marginBottom: 32, maxWidth: 500 }}>
+            {t.hero.sub}
+          </p>
 
-      {/*  CHANNELS AVAILABLE FOR COMPLAINTS  */}
-      <section style={{
-        width: "100%", boxSizing: "border-box", padding: "36px 32px",
-        background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)",
-      }}>
-        <div style={{ textAlign: "center", marginBottom: 22 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--primary)", textTransform: "uppercase" }}>
-            {t.channels.eyebrow}
-          </span>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)", marginTop: 6 }}>
-            {t.channels.title}
-          </h2>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))", gap: 12 }}>
-          {channelMeta.map(({ key, icon, href }) => (
-            <a key={key} href={href} style={{
-              background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12,
-              padding: "16px 8px", textAlign: "center", boxSizing: "border-box",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
-              transition: "box-shadow 0.15s, transform 0.15s",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,128,128,0.14)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}
-            >
-              <div style={{
-                width: 44, height: 44, borderRadius: "50%",
-                background: "rgba(0,128,128,0.1)", display: "flex", alignItems: "center",
-                justifyContent: "center", color: "var(--primary)",
-              }}>
-                <Icon d={icons[icon]} size={20} />
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)" }}>{t.channels.labels[key]}</div>
-              <div style={{ fontSize: 10, color: "var(--text-secondary)", wordBreak: "break-word" }}>{channelValues[key]}</div>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", pointerEvents: "auto" }}>
+            <a href="/complaints/new" style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "var(--primary)", color: "#fff",
+              padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
+              boxShadow: "0 4px 14px rgba(0,0,0,0.4)", transition: "transform 0.15s",
+            }}>
+              {t.hero.submit} <Icon d={icons.arrow} size={18} />
             </a>
-          ))}
+            <a href="/track" style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "rgba(255,255,255,0.1)", color: "#fff",
+              padding: "13px 28px", borderRadius: 10, fontWeight: 600, fontSize: 15,
+              border: "1.5px solid rgba(255,255,255,0.3)", backdropFilter: "blur(4px)"
+            }}>
+              {t.hero.track}
+            </a>
+          </div>
         </div>
       </section>
-
       {/*  STATS  */}
       <section style={{
         background: "var(--card)", borderBottom: "1px solid var(--border)",
-        width: "100%", boxSizing: "border-box", padding: "36px 32px",
+        width: "100%", boxSizing: "border-box", padding: "36px 24px",
       }}>
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "var(--primary)", textTransform: "uppercase" }}>
@@ -763,7 +704,7 @@ export default function LandingPage() {
             {t.stats.sub}
           </p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
           {complaintStatKeys.map((key) => (
             <div key={key} style={{
               border: "1px solid var(--border)", borderRadius: 12, padding: "16px 12px",
@@ -780,12 +721,7 @@ export default function LandingPage() {
                 <div className="skeleton" style={{ width: 44, height: 22, margin: "0 auto" }} />
               ) : (
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>
-                  {stats[key].toLocaleString()}
-                  {key !== "total" && (
-                    <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)" }}>
-                      {" "}({stats.total ? Math.round((stats[key] / stats.total) * 100) : 0}%)
-                    </span>
-                  )}
+                  {stats[key].toLocaleString()}{key === 'rate' ? '%' : ''}
                 </div>
               )}
               <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginTop: 6 }}>{t.complaintStats[key].label}</div>
@@ -801,7 +737,7 @@ export default function LandingPage() {
         <div style={{ marginTop: 52, marginBottom: 28 }}>
           <SectionHeading label={t.howItWorks.eyebrow} title={t.howItWorks.title} />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 52 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 52 }}>
           {t.howItWorks.steps.map(({ title, desc }, i) => (
             <div key={title} style={{
               background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14,
@@ -856,7 +792,7 @@ export default function LandingPage() {
 
         {/*  DEPARTMENTS  */}
         <SectionHeading label={t.departments.eyebrow} title={t.departments.title} sub={t.departments.sub} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 52 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 52 }}>
           {deptKeys.map((key, i) => (
             <div key={key}
               onMouseEnter={() => setHoveredDept(key)}
@@ -878,41 +814,6 @@ export default function LandingPage() {
           ))}
         </div>
 
-        {/*  OFFICES WITH MOST COMPLAINTS  */}
-        <SectionHeading
-          label={t.offices.eyebrow}
-          title={t.offices.title}
-          sub={t.offices.sub}
-        />
-        <div style={{
-          background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14,
-          padding: "8px 20px", marginBottom: 52, boxSizing: "border-box",
-        }}>
-          {t.offices.names.map((name, i) => (
-            <div key={name} style={{
-              display: "flex", alignItems: "center", gap: 14, padding: "14px 0",
-              borderBottom: i < t.offices.names.length - 1 ? "1px solid var(--border)" : "none",
-            }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: 9, flexShrink: 0,
-                background: "rgba(0,128,128,0.1)", display: "flex", alignItems: "center",
-                justifyContent: "center", color: "var(--primary)",
-              }}>
-                <Icon d={icons.building} size={17} />
-              </div>
-              <div style={{ flex: 1, textAlign: "left", fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
-                {name}
-              </div>
-              {loading ? (
-                <div className="skeleton" style={{ width: 32, height: 16 }} />
-              ) : (
-                <div style={{ fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 700, color: "var(--primary)" }}>
-                  0
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
 
         {/*  SERVICES  */}
         <section id="services" style={{ paddingTop: 8 }}>
@@ -921,7 +822,7 @@ export default function LandingPage() {
             title={t.services.title}
             sub={t.services.sub}
           />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginBottom: 52 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 52 }}>
             {t.services.items.map(({ title, tag, desc }, i) => (
               <div key={title}
                 onMouseEnter={() => setHoveredSvc(title)}
@@ -957,7 +858,7 @@ export default function LandingPage() {
           <SectionHeading label={t.about.eyebrow} title={t.about.title} />
 
           {/* mission + values */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 36, marginBottom: 44, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 36, marginBottom: 44, alignItems: "start" }}>
             {/* left: narrative */}
             <div style={{ textAlign: "left" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)", marginBottom: 14, letterSpacing: -0.5 }}>
@@ -989,7 +890,7 @@ export default function LandingPage() {
                   border: "1px solid var(--border)", marginBottom: 12, display: "block",
                 }}
               />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
                 {t.about.values.map(({ title, desc }, i) => (
                   <div key={title} style={{
                     background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12,
@@ -1088,7 +989,7 @@ export default function LandingPage() {
             sub={t.contact.sub}
           />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginBottom: 52 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 28, marginBottom: 52 }}>
             {/* contact info */}
             <div style={{ textAlign: "left" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "var(--text-primary)", marginBottom: 10 }}>{t.contact.talkTitle}</h3>
@@ -1121,7 +1022,7 @@ export default function LandingPage() {
             }}>
               <form onSubmit={handleFormSubmit} noValidate>
                 {/* name + email row */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 12 }}>
                   {[
                     { name: "name",  label: t.contact.form.name,  type: "text",  placeholder: t.contact.form.namePh },
                     { name: "email", label: t.contact.form.email, type: "email", placeholder: t.contact.form.emailPh },

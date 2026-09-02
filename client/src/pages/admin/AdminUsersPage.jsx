@@ -87,12 +87,6 @@ export default function AdminUsersPage() {
       setError("You can't deactivate your own account.");
       return;
     }
-    if (target.isActive) {
-      const ok = window.confirm(
-        `Deactivate ${target.name}'s account? They won't be able to log in until reactivated.`
-      );
-      if (!ok) return;
-    }
     setSavingId(target._id);
     setNotice("");
     setError("");

@@ -141,12 +141,6 @@ export default function AdminDepartmentsPage() {
   };
 
   const toggleActive = async (dept) => {
-    if (dept.isActive) {
-      const ok = window.confirm(
-        `Deactivate ${dept.departmentName}? It will no longer receive new complaints or appear on the "Department Staff" registration dropdown.`
-      );
-      if (!ok) return;
-    }
     setTogglingId(dept.id);
     try {
       await departmentService.update(dept.id, { isActive: !dept.isActive });

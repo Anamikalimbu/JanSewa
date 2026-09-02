@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
-import DepartmentLayout from "../../layouts/DepartmentLayout";
-import AdminLayout from "../../layouts/AdminLayout";
 import { useLanguage } from "../../context/LanguageContext";
-import { useAuth } from "../../context/AuthContext";
 import { complaintService } from "../../services/complaintService";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
@@ -38,12 +35,8 @@ const infoRow = { display: "flex", justifyContent: "space-between", padding: "8p
 
 export default function ComplaintDetailPage() {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
-
-  const Layout = user?.role === "admin" ? AdminLayout : user?.role === "department" ? DepartmentLayout : DashboardLayout;
-  const backTo = user?.role === "admin" ? "/admin/complaints" : user?.role === "department" ? "/department/assigned" : "/complaints";
 
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -99,25 +92,35 @@ export default function ComplaintDetailPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this complaint? This cannot be undone.")) return;
+    try {
+      await complaintService.delete(id);
+      navigate("/complaints");
+    } catch (err) {
+      setError(err?.response?.data?.message || "Couldn't delete this complaint.");
+    }
+  };
+
   if (loading) {
     return (
-      <Layout>
+      <DashboardLayout>
         <div className="skeleton" style={{ width: 200, height: 20, marginBottom: 20 }} />
         <div className="skeleton" style={{ width: "100%", height: 220, borderRadius: 12 }} />
-      </Layout>
+      </DashboardLayout>
     );
   }
 
   if (error && !complaint) {
     return (
-      <Layout>
+      <DashboardLayout>
         <div style={{ background: "var(--accent-light)", color: "var(--accent)", borderRadius: 8, padding: "14px 18px", fontSize: 13.5 }}>
           {error}
         </div>
-        <Link to={backTo} style={{ display: "inline-block", marginTop: 14, fontSize: 13, color: "var(--primary)", fontWeight: 600 }}>
+        <Link to="/complaints" style={{ display: "inline-block", marginTop: 14, fontSize: 13, color: "var(--primary)", fontWeight: 600 }}>
           ← {t("detail_back")}
         </Link>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
@@ -127,10 +130,20 @@ export default function ComplaintDetailPage() {
     complaint.status === "Closed" ? STATUS_ORDER.length : STATUS_ORDER.indexOf(complaint.status);
 
   return (
-    <Layout>
-      <Link to={backTo} style={{ fontSize: 12.5, color: "var(--primary)", fontWeight: 600, display: "inline-block", marginBottom: 10 }}>
-        ← {t("detail_back")}
-      </Link>
+    <DashboardLayout>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <Link to="/complaints" style={{ fontSize: 12.5, color: "var(--primary)", fontWeight: 600 }}>
+          ← {t("detail_back")}
+        </Link>
+        {complaint.status === "Pending" && (
+          <button 
+            onClick={handleDelete} 
+            style={{ background: "var(--accent-light)", color: "var(--accent)", border: "1px solid var(--accent)", padding: "4px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+          >
+            {t("Delete")}
+          </button>
+        )}
+      </div>
       <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)", marginBottom: 18 }}>
         {t("detail_title")}
       </div>
@@ -163,6 +176,7 @@ export default function ComplaintDetailPage() {
             <div style={infoRow}><span style={{ color: "var(--text-secondary)" }}>{t("detail_category")}</span><span style={{ fontWeight: 600 }}>{complaint.category}{complaint.subCategory ? ` · ${complaint.subCategory}` : ""}</span></div>
             <div style={infoRow}><span style={{ color: "var(--text-secondary)" }}>{t("detail_location")}</span><span style={{ fontWeight: 600, textAlign: "right" }}>{complaint.location?.address}{complaint.wardNumber ? `, Ward ${complaint.wardNumber}` : ""}</span></div>
             <div style={infoRow}><span style={{ color: "var(--text-secondary)" }}>{t("detail_dateSubmitted")}</span><span style={{ fontWeight: 600 }}>{formatDateTime(complaint.createdAt)}</span></div>
+            <div style={infoRow}><span style={{ color: "var(--text-secondary)" }}>Priority</span><span style={{ fontWeight: 600 }}>{complaint.priority || "Medium"}</span></div>
             <div style={infoRow}><span style={{ color: "var(--text-secondary)" }}>{t("detail_department")}</span><span style={{ fontWeight: 600 }}>{complaint.department || t("detail_notAssigned")}</span></div>
             <div style={{ ...infoRow, borderBottom: "none" }}><span style={{ color: "var(--text-secondary)" }}>{t("detail_assignedTo")}</span><span style={{ fontWeight: 600 }}>{complaint.assignedOfficer || t("detail_notAssigned")}</span></div>
           </div>
@@ -278,6 +292,6 @@ export default function ComplaintDetailPage() {
           </button>
         </form>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 }

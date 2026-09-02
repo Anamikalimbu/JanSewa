@@ -13,6 +13,7 @@ export const complaintService = {
   getDepartmentStats: () => api.get("/complaints/stats/department"),
   getDepartmentTrend: (months) => api.get("/complaints/stats/department/over-time", { params: { months } }),
   getMine: (params) => api.get("/complaints/mine", { params }),
+  getPublic: (params) => api.get("/complaints/public", { params }),
 
   // params: { page, limit, tab, search, sort }
   getAll: (params) => api.get("/complaints", { params }),
@@ -38,4 +39,5 @@ export const complaintService = {
   reportIssue: (id, reason) => api.post(`/complaints/${id}/report`, { reason }),
   updateStatus: (id, status, note) => api.patch(`/complaints/${id}/status`, { status, note }),
   assignDepartment: (id, departmentId) => api.patch(`/complaints/${id}/assign-department`, { departmentId }),
+  delete: (id) => api.delete(`/complaints/${id}`),
 };

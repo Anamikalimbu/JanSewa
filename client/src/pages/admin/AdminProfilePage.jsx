@@ -4,7 +4,6 @@
  * Profile page, wrapped in AdminLayout instead of DashboardLayout.
  */
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
 import { ProfileIllustration } from "../../components/common/Illustrations";
 import { useAuth } from "../../context/AuthContext";
@@ -48,13 +47,7 @@ const Field = ({ label, name, value, onChange, editing, readOnly = false, icon }
 );
 
 export default function AdminProfilePage() {
-  const { user, loading: authLoading, updateUser } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== "admin")) navigate("/home");
-  }, [authLoading, user, navigate]);
-
+  const { user, updateUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(null);
@@ -90,8 +83,6 @@ export default function AdminProfilePage() {
     setEditing(false);
   };
 
-  if (authLoading || !user || user.role !== "admin") return null;
-
   return (
     <AdminLayout>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
@@ -102,7 +93,7 @@ export default function AdminProfilePage() {
         <ProfileIllustration width={130} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, alignItems: "start", maxWidth: 780 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 20, alignItems: "start", maxWidth: 780 }}>
         <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: 24, textAlign: "center", boxSizing: "border-box" }}>
           <div style={{
             width: 72, height: 72, borderRadius: "50%", margin: "0 auto 14px",

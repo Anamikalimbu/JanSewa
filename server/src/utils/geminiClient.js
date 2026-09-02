@@ -1,18 +1,15 @@
 /**
  * utils/geminiClient.js
  *
- * Thin wrapper around Google's Gemini REST API (generateContent).
+ * Wrapper around Google's Gemini API using the official @google/generative-ai SDK.
  * Used by:
  *   - routes/mapRoutes.js   -> AI hotspot/trend summary of complaints
  *   - routes/chatRoutes.js  -> AI citizen support assistant
- *
- * No SDK dependency required — plain fetch against the public
- * Generative Language API, so it works with just a GEMINI_API_KEY
- * in the .env file.
  */
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 
 /**
  * Calls Gemini with a system instruction + conversation turns and
@@ -37,46 +34,43 @@ async function callGemini({ systemInstruction, turns, temperature = 0.4, maxOutp
     throw err;
   }
 
-  const body = {
-    contents: turns.map((turn) => ({
-      role: turn.role === "model" ? "model" : "user",
-      parts: [{ text: turn.text }],
-    })),
-    generationConfig: {
-      temperature,
-      maxOutputTokens,
-    },
-  };
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
 
-  if (systemInstruction) {
-    body.systemInstruction = { parts: [{ text: systemInstruction }] };
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_MODEL,
+      systemInstruction: systemInstruction || undefined,
+      generationConfig: {
+        temperature,
+        maxOutputTokens,
+      },
+    });
+
+    // Build chat history (all turns except the last which is the current message)
+    const history = turns.slice(0, -1).map((t) => ({
+      role: t.role === "model" ? "model" : "user",
+      parts: [{ text: t.text }],
+    }));
+
+    const lastTurn = turns[turns.length - 1];
+
+    const chat = model.startChat({ history });
+    const result = await chat.sendMessage(lastTurn.text);
+    const text = result.response.text();
+
+    if (!text) {
+      const err = new Error("Gemini returned no content.");
+      err.statusCode = 502;
+      throw err;
+    }
+
+    return text.trim();
+  } catch (err) {
+    if (err.statusCode) throw err;
+    const wrapped = new Error(`Gemini error: ${err.message}`);
+    wrapped.statusCode = 502;
+    throw wrapped;
   }
-
-  const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text().catch(() => "");
-    const err = new Error(`Gemini API error (${response.status}): ${errText.slice(0, 300)}`);
-    err.statusCode = 502;
-    throw err;
-  }
-
-  const data = await response.json();
-
-  const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
-
-  if (!text) {
-    const finishReason = data?.candidates?.[0]?.finishReason;
-    const err = new Error(`Gemini returned no content${finishReason ? ` (${finishReason})` : ""}.`);
-    err.statusCode = 502;
-    throw err;
-  }
-
-  return text.trim();
 }
 
 module.exports = { callGemini, GEMINI_MODEL };

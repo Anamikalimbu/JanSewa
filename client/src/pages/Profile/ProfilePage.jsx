@@ -123,7 +123,7 @@ export default function ProfilePage() {
         <ProfileIllustration width={140} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, alignItems: "start" }}>
         {/* left: avatar card */}
         <div style={{
           background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14,

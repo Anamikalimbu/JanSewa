@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
+    window.location.href = "/";
   };
 
   // Lets a logged-in user change their own password from a Settings page.

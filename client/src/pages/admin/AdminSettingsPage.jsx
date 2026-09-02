@@ -4,7 +4,6 @@
  * portal-wide preferences (stored locally for now).
  */
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
 import { SettingsIllustration } from "../../components/common/Illustrations";
 import { useAuth } from "../../context/AuthContext";
@@ -57,12 +56,7 @@ const PREF_KEY = "jansewa_admin_prefs";
 const defaultPrefs = { newComplaintAlerts: true, weeklyDigest: true, autoAssign: false };
 
 export default function AdminSettingsPage() {
-  const { user, loading: authLoading, changePassword } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== "admin")) navigate("/home");
-  }, [authLoading, user, navigate]);
+  const { changePassword } = useAuth();
 
   const [prefs, setPrefs] = useState(defaultPrefs);
   useEffect(() => {
@@ -108,8 +102,6 @@ export default function AdminSettingsPage() {
     outline: "none", boxSizing: "border-box", fontFamily: "var(--font-body)", marginBottom: 12,
   };
   const labelStyle = { display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 };
-
-  if (authLoading || !user || user.role !== "admin") return null;
 
   return (
     <AdminLayout>

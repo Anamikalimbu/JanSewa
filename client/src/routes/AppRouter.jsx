@@ -9,6 +9,7 @@ import MyComplaintsPage from "../pages/Complaints/MyComplaintsPage";
 import SubmitComplaintPage from "../pages/Complaints/SubmitComplaintPage";
 import ComplaintsMapPage from "../pages/Complaints/ComplaintsMapPage";
 import ComplaintDetailPage from "../pages/Complaints/ComplaintDetailPage";
+import TrackComplaintsPage from "../pages/Home/TrackComplaintsPage";
 import NotificationsPage from "../pages/Dashboard/NotificationsPage";
 import ProfilePage from "../pages/Profile/ProfilePage";
 import SettingsPage from "../pages/Profile/SettingsPage";
@@ -24,8 +25,6 @@ import DepartmentDashboardPage from "../pages/Admin/Department/DepartmentDashboa
 import DepartmentAssignedPage from "../pages/Admin/Department/DepartmentAssignedPage";
 import DepartmentDepartmentsPage from "../pages/Admin/Department/DepartmentDepartmentsPage";
 import DepartmentReportsPage from "../pages/Admin/Department/DepartmentReportsPage";
-import DepartmentProfilePage from "../pages/Admin/Department/DepartmentProfilePage";
-import DepartmentSettingsPage from "../pages/Admin/Department/DepartmentSettingsPage";
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -36,6 +35,7 @@ const AppRouter = () => (
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+      <Route path="/track" element={<TrackComplaintsPage />} />
       <Route path="/complaints" element={<MyComplaintsPage />} />
       <Route path="/complaints/new" element={<SubmitComplaintPage />} />
       <Route path="/map" element={<ComplaintsMapPage />} />
@@ -55,8 +55,6 @@ const AppRouter = () => (
       <Route path="/department/assigned" element={<DepartmentAssignedPage />} />
       <Route path="/department/departments" element={<DepartmentDepartmentsPage />} />
       <Route path="/department/reports" element={<DepartmentReportsPage />} />
-      <Route path="/department/profile" element={<DepartmentProfilePage />} />
-      <Route path="/department/settings" element={<DepartmentSettingsPage />} />
       {/* Routes will be added here each week */}
     </Routes>
   </BrowserRouter>

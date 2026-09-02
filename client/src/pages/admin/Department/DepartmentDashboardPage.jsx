@@ -155,7 +155,7 @@ export default function DepartmentDashboardPage() {
         }}>
           <span style={{ width: 60 }}>ID</span>
           <span style={{ flex: 3 }}>Title</span>
-          <span style={{ flex: 2 }}>Location</span>
+          <span style={{ flex: 2 }}>Priority</span>
           <span style={{ flex: 1.5 }}>Status</span>
           <span style={{ flex: 1.5 }}>Date</span>
           <span style={{ width: 60, textAlign: "right" }}>Action</span>
@@ -179,7 +179,7 @@ export default function DepartmentDashboardPage() {
             <div key={c.id} style={{ display: "flex", alignItems: "center", padding: "10px 16px", gap: 8, borderBottom: "1px solid var(--border)", fontSize: 13 }}>
               <span style={{ width: 60, fontSize: 11, color: "var(--text-muted)" }}>#{c.code}</span>
               <span style={{ flex: 3, fontWeight: 500, color: "var(--text-primary)" }}>{c.title}</span>
-              <span style={{ flex: 2, fontSize: 12, color: "var(--text-secondary)" }}>{c.location?.address || "—"}</span>
+              <span style={{ flex: 2, fontSize: 12, color: "var(--text-secondary)" }}>{c.priority || "Medium"}</span>
               <span style={{ flex: 1.5 }}><StatusBadge status={c.status} /></span>
               <span style={{ flex: 1.5, fontSize: 12, color: "var(--text-secondary)" }}>{formatDate(c.createdAt)}</span>
               <span style={{ width: 60, textAlign: "right" }}>

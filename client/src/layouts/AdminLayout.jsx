@@ -16,10 +16,11 @@ const iconPaths = {
   chevron:     "M6 9l6 6 6-6",
   user:        "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 11a4 4 0 100-8 4 4 0 000 8z",
   menu:        "M3 12h18M3 6h18M3 18h18",
+  close:       "M6 18L18 6M6 6l12 12"
 };
 
-const Icon = ({ d, size = 18, ...rest }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...rest}>
+const Icon = ({ d, size = 18, className = "", ...rest }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...rest}>
     <path d={d} />
   </svg>
 );
@@ -41,6 +42,7 @@ export default function AdminLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const menuRef = useRef(null);
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
@@ -54,6 +56,11 @@ export default function AdminLayout({ children }) {
   useEffect(() => {
     const onClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        if (!e.target.closest('#hamburger-btn-admin')) {
+            setSidebarOpen(false);
+        }
+      }
     };
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
@@ -67,87 +74,62 @@ export default function AdminLayout({ children }) {
   const initials = (user?.name || "?").split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--background)", fontFamily: "var(--font-body)" }}>
+    <div className="min-h-screen bg-background font-body">
       {/* TOP BAR */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 50, height: 60,
-        background: "var(--card)", borderBottom: "1px solid var(--border)",
-        display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button className="app-hamburger" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
-            <Icon d={iconPaths.menu} size={18} />
+      <header className="sticky top-0 z-50 h-[60px] bg-card border-b border-border flex items-center justify-between px-4 md:px-6">
+        <div className="flex items-center gap-3">
+          <button 
+            id="hamburger-btn-admin"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="md:hidden flex items-center justify-center text-text-secondary hover:text-primary transition-colors p-1 bg-transparent border-none"
+          >
+            <Icon d={sidebarOpen ? iconPaths.close : iconPaths.menu} size={22} />
           </button>
-          <Link to="/admin" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{
-              width: 30, height: 30, borderRadius: 8,
-              background: "linear-gradient(135deg, var(--primary), var(--secondary))",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <span style={{ color: "#fff", fontWeight: 800, fontSize: 13, fontFamily: "var(--font-display)" }}>J</span>
+          <Link to="/admin" className="flex items-center gap-2">
+            <div className="w-[30px] h-[30px] rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
+              <span className="text-white font-extrabold text-[13px] font-display">J</span>
             </div>
-            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>
-              JanSewa <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>— Admin Panel</span>
+            <span className="font-display font-bold text-base text-text-primary hidden sm:block">
+              JanSewa <span className="text-text-secondary font-medium hidden md:inline">— Admin Panel</span>
             </span>
           </Link>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <Link
-            to="/notifications"
-            style={{
-              position: "relative", width: 36, height: 36, borderRadius: 10,
-              border: "1px solid var(--border)", display: "flex", alignItems: "center",
-              justifyContent: "center", color: "var(--text-secondary)",
-            }}
-            aria-label="Notifications"
-          >
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-lg border border-border flex items-center justify-center text-text-secondary">
             <Icon d={iconPaths.bell} size={17} />
             {unreadCount > 0 && (
-              <span style={{
-                position: "absolute", top: -5, right: -5, minWidth: 17, height: 17, borderRadius: 9,
-                background: "var(--accent)", color: "#fff", fontSize: 10, fontWeight: 700,
-                display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px",
-              }}>
+              <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center px-1">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
-          </Link>
+          </div>
 
-          <div ref={menuRef} style={{ position: "relative" }}>
-            <button onClick={() => setMenuOpen((o) => !o)} style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: "50%",
-                background: "linear-gradient(135deg, var(--primary), var(--secondary))",
-                color: "#fff", fontSize: 12, fontWeight: 700,
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
+          <div ref={menuRef} className="relative">
+            <button onClick={() => setMenuOpen((o) => !o)} className="flex items-center gap-2 bg-transparent border-none p-0 cursor-pointer">
+              <div className="w-8 h-8 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-primary to-secondary text-white text-xs font-bold flex items-center justify-center shadow-sm">
                 {initials}
               </div>
-              <Icon d={iconPaths.chevron} size={14} style={{ color: "var(--text-muted)" }} />
+              <Icon d={iconPaths.chevron} size={14} className="text-text-muted hidden sm:block" />
             </button>
 
             {menuOpen && (
-              <div style={{
-                position: "absolute", right: 0, top: "calc(100% + 8px)", width: 190,
-                background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10,
-                boxShadow: "0 8px 24px rgba(15,23,42,0.12)", overflow: "hidden",
-              }}>
-                <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--border)" }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{user?.name}</div>
-                  <div style={{ fontSize: 11.5, color: "var(--text-secondary)" }}>{user?.email}</div>
-                  <div style={{ fontSize: 10.5, color: "var(--primary)", fontWeight: 700, marginTop: 2, textTransform: "uppercase" }}>Admin</div>
+              <div className="absolute right-0 top-[calc(100%+8px)] w-[190px] bg-card border border-border rounded-xl shadow-lg overflow-hidden animate-fade-in-down z-50">
+                <div className="p-3 border-b border-border">
+                  <div className="text-[13px] font-bold text-text-primary truncate">{user?.name}</div>
+                  <div className="text-[11.5px] text-text-secondary truncate">{user?.email}</div>
+                  <div className="text-[10.5px] text-primary font-bold mt-0.5 uppercase">Admin</div>
                 </div>
                 <Link
                   to="/admin/profile"
                   onClick={() => setMenuOpen(false)}
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", fontSize: 13, color: "var(--text-primary)" }}
+                  className="flex items-center gap-2 p-3 text-[13px] text-text-primary hover:bg-gray-50 transition-colors"
                 >
                   <Icon d={iconPaths.user} size={15} /> Profile
                 </Link>
                 <button
                   onClick={handleLogout}
-                  style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", fontSize: 13, color: "var(--accent)", background: "none", border: "none", textAlign: "left", cursor: "pointer" }}
+                  className="w-full flex items-center gap-2 p-3 text-[13px] text-accent bg-transparent border-none text-left cursor-pointer hover:bg-red-50 transition-colors"
                 >
                   <Icon d={iconPaths.logout} size={15} /> Logout
                 </button>
@@ -157,55 +139,50 @@ export default function AdminLayout({ children }) {
         </div>
       </header>
 
-      <div style={{ display: "flex" }}>
-        {/* MOBILE BACKDROP */}
-        <div
-          className={`app-sidebar-backdrop${sidebarOpen ? " open" : ""}`}
-          onClick={() => setSidebarOpen(false)}
-        />
+      <div className="flex relative">
+        {/* OVERLAY FOR MOBILE SIDEBAR */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
 
         {/* SIDEBAR */}
-        <aside className={`app-sidebar${sidebarOpen ? " open" : ""}`} style={{
-          width: 220, flexShrink: 0, minHeight: "calc(100vh - 60px)",
-          background: "var(--card)", borderRight: "1px solid var(--border)",
-          padding: "18px 12px", boxSizing: "border-box",
-        }}>
-          <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <aside 
+          ref={sidebarRef}
+          className={`fixed md:sticky top-[60px] left-0 z-50 w-[220px] shrink-0 h-[calc(100vh-60px)] bg-card border-r border-border p-4 box-border transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+        >
+          <nav className="flex flex-col gap-1 h-full overflow-y-auto pb-4">
             {navItems.map(({ to, label, icon }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={to === "/admin"}
                 onClick={() => setSidebarOpen(false)}
-                style={({ isActive }) => ({
-                  display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
-                  borderRadius: 8, fontSize: 13.5, fontWeight: isActive ? 700 : 500,
-                  color: isActive ? "var(--primary)" : "var(--text-secondary)",
-                  background: isActive ? "rgba(0,128,128,0.1)" : "transparent",
-                })}
+                className={({ isActive }) => 
+                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] transition-colors ${isActive ? 'font-bold text-primary bg-primary/10' : 'font-medium text-text-secondary hover:bg-gray-50'}`
+                }
               >
                 <Icon d={iconPaths[icon]} size={17} />
-                <span>{label}</span>
+                <span className="flex-1 truncate">{label}</span>
               </NavLink>
             ))}
 
-            <button
-              onClick={handleLogout}
-              style={{
-                display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
-                borderRadius: 8, fontSize: 13.5, fontWeight: 500, color: "var(--accent)",
-                background: "none", border: "none", textAlign: "left", marginTop: 8,
-                borderTop: "1px solid var(--border)", paddingTop: 14, cursor: "pointer",
-              }}
-            >
-              <Icon d={iconPaths.logout} size={17} />
-              Logout
-            </button>
+            <div className="mt-auto pt-4 border-t border-border">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium text-accent bg-transparent border-none text-left cursor-pointer hover:bg-red-50 transition-colors"
+              >
+                <Icon d={iconPaths.logout} size={17} />
+                Logout
+              </button>
+            </div>
           </nav>
         </aside>
 
         {/* MAIN CONTENT */}
-        <main style={{ flex: 1, padding: 28, boxSizing: "border-box", minWidth: 0 }}>
+        <main className="flex-1 p-4 md:p-6 lg:p-7 box-border min-w-0 w-full md:w-auto">
           {children}
         </main>
       </div>

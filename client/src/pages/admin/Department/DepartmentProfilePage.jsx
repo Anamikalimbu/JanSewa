@@ -5,7 +5,6 @@
  * assigned department name.
  */
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import DepartmentLayout from "../../../layouts/DepartmentLayout";
 import { ProfileIllustration } from "../../../components/common/Illustrations";
 import { useAuth } from "../../../context/AuthContext";
@@ -49,12 +48,7 @@ const Field = ({ label, name, value, onChange, editing, readOnly = false, icon }
 );
 
 export default function DepartmentProfilePage() {
-  const { user, loading: authLoading, updateUser } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== "department")) navigate("/home");
-  }, [authLoading, user, navigate]);
+  const { user, updateUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(null);
@@ -91,8 +85,6 @@ export default function DepartmentProfilePage() {
     setEditing(false);
   };
 
-  if (authLoading || !user || user.role !== "department") return null;
-
   return (
     <DepartmentLayout>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16, marginBottom: 22 }}>
@@ -103,7 +95,7 @@ export default function DepartmentProfilePage() {
         <ProfileIllustration width={130} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, alignItems: "start", maxWidth: 780 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 20, alignItems: "start", maxWidth: 780 }}>
         <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: 24, textAlign: "center", boxSizing: "border-box" }}>
           <div style={{
             width: 72, height: 72, borderRadius: "50%", margin: "0 auto 14px",

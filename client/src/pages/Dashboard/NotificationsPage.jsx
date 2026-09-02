@@ -1,18 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
-import DepartmentLayout from "../../layouts/DepartmentLayout";
-import AdminLayout from "../../layouts/AdminLayout";
 import { EmptyStateIllustration } from "../../components/common/Illustrations";
 import { useLanguage } from "../../context/LanguageContext";
-import { useAuth } from "../../context/AuthContext";
 import { notificationService } from "../../services/notificationService";
 
-const TYPE_TITLE_KEYS = {
-  ComplaintCreated: "notif_type_created",
-  ComplaintAssigned: "notif_type_assigned",
-  StatusUpdated: "notif_type_statusUpdated",
-  ComplaintResolved: "notif_type_resolved",
+const TYPE_TITLES = {
+  ComplaintCreated: "Complaint submitted successfully",
+  ComplaintAssigned: "Complaint assigned to department",
+  StatusUpdated: "Your complaint status was updated",
+  ComplaintResolved: "Your complaint was resolved",
 };
 
 const toCode = (id) => (id ? `CMP${String(id).slice(-6).toUpperCase()}` : null);
@@ -39,10 +36,7 @@ const Icon = ({ d, size = 28 }) => (
 
 export default function NotificationsPage() {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const navigate = useNavigate();
-
-  const Layout = user?.role === "admin" ? AdminLayout : user?.role === "department" ? DepartmentLayout : DashboardLayout;
 
   const [notifications, setNotifications] = useState([]);
   const [tab, setTab] = useState("all");
@@ -55,7 +49,7 @@ export default function NotificationsPage() {
     notificationService
       .getAll({ limit: 50 })
       .then(({ data }) => setNotifications(data?.data?.notifications || []))
-      .catch(() => setError(t("notif_loadError")))
+      .catch(() => setError("Couldn't load your notifications. Please try refreshing."))
       .finally(() => setLoading(false));
   };
 
@@ -76,7 +70,7 @@ export default function NotificationsPage() {
       await notificationService.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     } catch {
-      setError(t("notif_markAllError"));
+      setError("Couldn't mark all notifications as read.");
     }
   };
 
@@ -93,23 +87,23 @@ export default function NotificationsPage() {
   };
 
   const tabs = [
-    { key: "all", label: t("notif_tab_all"), count: counts.all },
-    { key: "unread", label: t("notif_tab_unread"), count: counts.unread },
-    { key: "read", label: t("notif_tab_read"), count: counts.read },
+    { key: "all", label: "All", count: counts.all },
+    { key: "unread", label: "Unread", count: counts.unread },
+    { key: "read", label: "Read", count: counts.read },
   ];
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
         <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>
-          {t("notif_title")}
+          {t("nav_notifications")}
         </div>
         {counts.unread > 0 && (
           <button
             onClick={handleMarkAllRead}
             style={{ fontSize: 12.5, color: "var(--primary)", fontWeight: 600, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
           >
-            {t("notif_markAllRead")}
+            Mark all as read
           </button>
         )}
       </div>
@@ -152,7 +146,7 @@ export default function NotificationsPage() {
           <div style={{ padding: "40px 24px", textAlign: "center" }}>
             <EmptyStateIllustration variant="bell" width={130} />
             <div style={{ fontSize: 13.5, color: "var(--text-secondary)", marginTop: 6 }}>
-              {tab === "unread" ? t("notif_empty_unread") : tab === "read" ? t("notif_empty_read") : t("notif_empty_all")}
+              {tab === "unread" ? "No unread notifications." : tab === "read" ? "No read notifications yet." : "No notifications yet."}
             </div>
           </div>
         ) : (
@@ -173,7 +167,7 @@ export default function NotificationsPage() {
               }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13.5, fontWeight: n.isRead ? 500 : 700, color: n.isRead ? "var(--text-secondary)" : "var(--text-primary)" }}>
-                  {t(TYPE_TITLE_KEYS[n.type] || "notif_type_default")}
+                  {TYPE_TITLES[n.type] || "Notification"}
                 </div>
                 <div style={{ fontSize: 12.5, color: "var(--text-secondary)", marginTop: 2 }}>{n.message}</div>
                 <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
@@ -193,6 +187,6 @@ export default function NotificationsPage() {
           ))
         )}
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 }

@@ -200,6 +200,50 @@ router.get(
 );
 
 /**
+ * GET /api/complaints/public
+ * Public route to fetch all complaints across the system for the tracking page.
+ */
+router.get(
+  "/public",
+  asyncHandler(async (req, res) => {
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Number(req.query.limit) || 10, 100);
+    const { tab, search, sort } = req.query;
+
+    const filter = {};
+    const TAB_STATUS_MAP = {
+      pending: [COMPLAINT_STATUSES.PENDING],
+      inProgress: [COMPLAINT_STATUSES.ASSIGNED, COMPLAINT_STATUSES.IN_PROGRESS],
+      resolved: [COMPLAINT_STATUSES.RESOLVED, COMPLAINT_STATUSES.CLOSED],
+    };
+    if (tab && TAB_STATUS_MAP[tab]) filter.status = { $in: TAB_STATUS_MAP[tab] };
+
+    if (search) {
+      const rx = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      const orClauses = [{ title: rx }, { category: rx }];
+      const codeMatch = search.trim().match(/^#?CMP([0-9A-Fa-f]{1,6})$/i);
+      if (codeMatch) {
+        orClauses.push({ $expr: { $regexMatch: { input: { $toString: "$_id" }, regex: codeMatch[1], options: "i" } } });
+      }
+      filter.$or = orClauses;
+    }
+
+    const sortSpec = sort === "createdAt" ? { createdAt: 1 } : { createdAt: -1 };
+
+    const [complaints, total] = await Promise.all([
+      Complaint.find(filter)
+        .sort(sortSpec)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate("departmentId", "departmentName"),
+      Complaint.countDocuments(filter),
+    ]);
+
+    sendPaginated(res, complaints.map(toListItem), page, limit, total, "Public complaints fetched");
+  })
+);
+
+/**
  * GET /api/complaints
  * Protected — powers the "My Complaints" page: search, status-tab filter,
  * sort, and pagination. Citizens only ever see their own complaints;
@@ -496,6 +540,36 @@ router.patch(
     sendSuccess(res, 200, "Department assignment updated.", {
       complaint: { ...toListItem(populated) },
     });
+  })
+);
+
+/**
+ * DELETE /api/complaints/:id
+ * Protected — lets the citizen who filed a complaint, or an admin, delete it.
+ * Only "Pending" complaints can be deleted by citizens to prevent disruption of active investigations.
+ */
+router.delete(
+  "/:id",
+  protect,
+  asyncHandler(async (req, res) => {
+    const complaint = await Complaint.findById(req.params.id);
+    if (!complaint) throw new AppError("Complaint not found.", 404);
+
+    if (req.user.role === "citizen") {
+      if (String(complaint.userId) !== String(req.user._id)) {
+        throw new AppError("You do not have permission to delete this complaint.", 403);
+      }
+      if (complaint.status !== COMPLAINT_STATUSES.PENDING) {
+        throw new AppError("You can only delete complaints that are still Pending.", 400);
+      }
+    } else if (req.user.role !== "admin") {
+      throw new AppError("You do not have permission to delete complaints.", 403);
+    }
+
+    await Complaint.findByIdAndDelete(req.params.id);
+    await Notification.deleteMany({ complaintId: req.params.id });
+
+    sendSuccess(res, 200, "Complaint deleted successfully.");
   })
 );
 

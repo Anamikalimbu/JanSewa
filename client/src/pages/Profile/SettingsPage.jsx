@@ -97,11 +97,11 @@ export default function SettingsPage() {
     e.preventDefault();
     setPwStatus(null);
     if (pwForm.newPassword.length < 8) {
-      setPwStatus(t("settings_pwErrShort"));
+      setPwStatus("New password must be at least 8 characters.");
       return;
     }
     if (pwForm.newPassword !== pwForm.confirmPassword) {
-      setPwStatus(t("settings_pwErrMismatch"));
+      setPwStatus("New password and confirmation do not match.");
       return;
     }
     setPwSaving(true);
@@ -110,7 +110,7 @@ export default function SettingsPage() {
       setPwStatus("success");
       setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
-      setPwStatus(err?.response?.data?.message || t("settings_pwErrGeneric"));
+      setPwStatus(err?.response?.data?.message || "Could not change password. Check your current password.");
     } finally {
       setPwSaving(false);
     }
@@ -132,10 +132,10 @@ export default function SettingsPage() {
       }}>
         <div>
           <div style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, color: "var(--text-primary)" }}>
-            {t("settings_title")}
+            Settings
           </div>
           <div style={{ fontSize: 13.5, color: "var(--text-secondary)" }}>
-            {t("settings_subtitle")}
+            Manage your password, notifications, and language.
           </div>
         </div>
         <SettingsIllustration width={140} />
@@ -143,13 +143,13 @@ export default function SettingsPage() {
 
       <div style={{ maxWidth: 640 }}>
         {/* Change password */}
-        <SectionCard icon={iconPaths.lock} title={t("settings_pwTitle")} desc={t("settings_pwDesc")}>
+        <SectionCard icon={iconPaths.lock} title="Change Password" desc="Use a strong password you don't use elsewhere.">
           <form onSubmit={handlePwSubmit} noValidate>
-            <label style={labelStyle}>{t("settings_pwCurrent")}</label>
+            <label style={labelStyle}>Current Password</label>
             <input type="password" name="currentPassword" value={pwForm.currentPassword} onChange={handlePwChange} style={inputStyle} required />
-            <label style={labelStyle}>{t("settings_pwNew")}</label>
+            <label style={labelStyle}>New Password</label>
             <input type="password" name="newPassword" value={pwForm.newPassword} onChange={handlePwChange} style={inputStyle} required minLength={8} />
-            <label style={labelStyle}>{t("settings_pwConfirm")}</label>
+            <label style={labelStyle}>Confirm New Password</label>
             <input type="password" name="confirmPassword" value={pwForm.confirmPassword} onChange={handlePwChange} style={inputStyle} required minLength={8} />
 
             <button type="submit" disabled={pwSaving} style={{
@@ -157,11 +157,11 @@ export default function SettingsPage() {
               border: "none", borderRadius: 9, padding: "10px 20px", fontSize: 13.5, fontWeight: 600,
               cursor: pwSaving ? "default" : "pointer", opacity: pwSaving ? 0.7 : 1, fontFamily: "var(--font-body)",
             }}>
-              <Icon d={iconPaths.check} size={15} /> {pwSaving ? t("settings_pwUpdating") : t("settings_pwUpdate")}
+              <Icon d={iconPaths.check} size={15} /> {pwSaving ? "Updating…" : "Update Password"}
             </button>
 
             {pwStatus === "success" && (
-              <p style={{ fontSize: 12.5, color: "var(--success)", marginTop: 10 }}>✓ {t("settings_pwSuccess")}</p>
+              <p style={{ fontSize: 12.5, color: "var(--success)", marginTop: 10 }}>✓ Password changed successfully.</p>
             )}
             {pwStatus && pwStatus !== "success" && (
               <p style={{ fontSize: 12.5, color: "var(--accent)", marginTop: 10 }}>{pwStatus}</p>
@@ -170,14 +170,14 @@ export default function SettingsPage() {
         </SectionCard>
 
         {/* Notification preferences */}
-        <SectionCard icon={iconPaths.bell} title={t("settings_notifTitle")} desc={t("settings_notifDesc")}>
-          <Toggle checked={prefs.email} onChange={(v) => updatePref("email", v)} label={t("settings_notifEmail")} description={t("settings_notifEmailDesc")} />
-          <Toggle checked={prefs.inApp} onChange={(v) => updatePref("inApp", v)} label={t("settings_notifInApp")} description={t("settings_notifInAppDesc")} />
-          <Toggle checked={prefs.sms} onChange={(v) => updatePref("sms", v)} label={t("settings_notifSms")} description={t("settings_notifSmsDesc")} />
+        <SectionCard icon={iconPaths.bell} title="Notification Preferences" desc="Choose how you'd like to hear about updates to your complaints.">
+          <Toggle checked={prefs.email} onChange={(v) => updatePref("email", v)} label="Email notifications" description="Status changes and replies sent to your inbox." />
+          <Toggle checked={prefs.inApp} onChange={(v) => updatePref("inApp", v)} label="In-app notifications" description="Shown in the bell icon at the top of the dashboard." />
+          <Toggle checked={prefs.sms} onChange={(v) => updatePref("sms", v)} label="SMS alerts" description="Text message alerts for urgent status changes." />
         </SectionCard>
 
         {/* Language */}
-        <SectionCard icon={iconPaths.globe} title={t("settings_langTitle")} desc={t("settings_langDesc")}>
+        <SectionCard icon={iconPaths.globe} title="Language" desc="Switch the interface between English and Nepali.">
           <div style={{ display: "flex", gap: 10 }}>
             {[{ key: "en", label: "English" }, { key: "ne", label: "नेपाली" }].map((l) => (
               <button

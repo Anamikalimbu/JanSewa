@@ -13,7 +13,6 @@ const iconPaths = {
   chevron:   "M6 9l6 6 6-6",
   user:      "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 11a4 4 0 100-8 4 4 0 000 8z",
   settings:  "M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 008.6 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H2.5a2 2 0 010-4h.09A1.65 1.65 0 004.6 8.6a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V2.5a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c.36.24.8.38 1.27.38H21.5a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z",
-  menu:      "M3 12h18M3 6h18M3 18h18",
 };
 
 const Icon = ({ d, size = 18, ...rest }) => (
@@ -36,7 +35,6 @@ export default function DepartmentLayout({ children }) {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -72,17 +70,12 @@ export default function DepartmentLayout({ children }) {
         background: "var(--card)", borderBottom: "1px solid var(--border)",
         display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button className="app-hamburger" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
-            <Icon d={iconPaths.menu} size={18} />
-          </button>
-          <Link to="/department" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <img src="/images/emblem-of-nepal-sm.png" alt="JanSewa" style={{ width: 30, height: 30, objectFit: "contain" }} />
-            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>
-              JanSewa{deptName ? <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}> — {deptName} Dept.</span> : null}
-            </span>
-          </Link>
-        </div>
+        <Link to="/department" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <img src="/images/emblem-of-nepal-sm.png" alt="JanSewa" style={{ width: 30, height: 30, objectFit: "contain" }} />
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>
+            JanSewa{deptName ? <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}> — {deptName} Dept.</span> : null}
+          </span>
+        </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <Link
@@ -152,14 +145,8 @@ export default function DepartmentLayout({ children }) {
       </header>
 
       <div style={{ display: "flex" }}>
-        {/* MOBILE BACKDROP */}
-        <div
-          className={`app-sidebar-backdrop${sidebarOpen ? " open" : ""}`}
-          onClick={() => setSidebarOpen(false)}
-        />
-
         {/* SIDEBAR */}
-        <aside className={`app-sidebar${sidebarOpen ? " open" : ""}`} style={{
+        <aside style={{
           width: 200, flexShrink: 0, minHeight: "calc(100vh - 60px)",
           background: "var(--card)", borderRight: "1px solid var(--border)",
           padding: "18px 12px", boxSizing: "border-box",
@@ -170,7 +157,6 @@ export default function DepartmentLayout({ children }) {
                 key={to}
                 to={to}
                 end={to === "/department"}
-                onClick={() => setSidebarOpen(false)}
                 style={({ isActive }) => ({
                   display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
                   borderRadius: 8, fontSize: 13.5, fontWeight: isActive ? 700 : 500,
