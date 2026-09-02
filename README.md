@@ -6,7 +6,6 @@ An intelligent complaint management system powered by AI (Google Gemini) that he
 
 ## ✨ Features
 
-- **AI-Powered Assistance**: Google Gemini AI integration for intelligent complaint analysis
 - **User Authentication**: Secure JWT-based authentication with role-based access control
 - **Complaint Management**: Create, track, and manage complaints with real-time status updates
 - **Department-Specific Routing**: Route complaints to appropriate departments
