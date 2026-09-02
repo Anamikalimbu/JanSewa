@@ -412,23 +412,6 @@ jansewa/
 
 ---
 
-## 🤖 AI Chat Integration
-
-JanSewa integrates **Google Gemini AI** for intelligent assistant features:
-
-### Features:
-- **Smart Complaint Analysis**: AI analyzes complaint text and suggests categories
-- **Helpful Responses**: AI provides guidance on complaint resolution
-- **Real-time Chat**: Interactive chat widget with Google Gemini
-- **Context-Aware Responses**: AI understands complaint context and user history
-
-### Configuration:
-- **API**: Uses `@google/generative-ai` package (v0.24.1)
-- **Model**: Google Generative AI (Gemini)
-- **Requires**: `GEMINI_API_KEY` environment variable
-
----
-
 ## �️ Location & Map Features
 
 JanSewa includes integrated mapping capabilities:
