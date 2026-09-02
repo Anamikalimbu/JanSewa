@@ -1200,62 +1200,11 @@ NODE_ENV=production npm start --prefix server
    git push origin feature/your-feature-name
    ```
 
-8. **Create Pull Request**
-   - Go to GitHub and create a PR
-   - Describe your changes
-   - Link related issues
 
-### Git Workflow Rules
 
-- Use descriptive commit messages
-- Keep commits focused on single features
-- Reference issue numbers in commits: `Fixes #123`
-- Rebase feature branches before PR
 
----
 
-## 📋 Version History
 
-- **v1.0.0** (Current): Initial release with full MERN stack, AI integration, and complaint management
-  - AI-powered chat integration
-  - Multi-language support
-  - Role-based access control
-  - Email notifications
-  - Image upload via Cloudinary
-  - Location tracking with maps
-  - Admin dashboard
 
----
 
-## 🌟 Acknowledgments
 
-- Built with ❤️ using MERN stack
-- Powered by Google Gemini AI
-- Icons and design inspiration from community resources
-- Special thanks to all contributors
-
----
-
-## 📝 Changelog
-
-### v1.0.0 - Initial Release
-- ✅ Complete MERN application
-- ✅ Google Gemini AI integration
-- ✅ Role-based access control
-- ✅ Multi-language support
-- ✅ Email notifications
-- ✅ Image upload & storage
-- ✅ Location tracking
-- ✅ Admin dashboard
-
----
-
-**Last Updated**: 2026-09-01  
-**Repository**: [github.com/Divya-Bhandari/jansewa](https://github.com/Divya-Bhandari/jansewa)  
-**License**: MIT
-
----
-
-**Happy coding! 🎉**
-
-If you found this helpful, please star ⭐ the repository and share with others!
