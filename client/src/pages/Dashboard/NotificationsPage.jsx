@@ -170,8 +170,16 @@ export default function NotificationsPage() {
                   {TYPE_TITLES[n.type] || "Notification"}
                 </div>
                 <div style={{ fontSize: 12.5, color: "var(--text-secondary)", marginTop: 2 }}>{n.message}</div>
-                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
-                  {n.complaintId ? `#${toCode(n.complaintId)} · ` : ""}{timeAgo(n.createdAt)}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    {n.complaintId ? `#${toCode(n.complaintId)} · ` : ""}{timeAgo(n.createdAt)}
+                  </span>
+                  <span style={{ fontSize: 10, fontWeight: 600, background: "rgba(0,128,128,0.1)", color: "var(--primary)", padding: "2px 6px", borderRadius: 4 }}>
+                    📧 Email Sent
+                  </span>
+                  <span style={{ fontSize: 10, fontWeight: 600, background: "rgba(32,178,170,0.1)", color: "#0d9488", padding: "2px 6px", borderRadius: 4 }}>
+                    📱 SMS Dispatch
+                  </span>
                 </div>
               </div>
               <button
