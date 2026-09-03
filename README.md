@@ -6,7 +6,6 @@ An intelligent complaint management system powered by AI (Google Gemini) that he
 
 ## ✨ Features
 
-- **AI-Powered Assistance**: Google Gemini AI integration for intelligent complaint analysis
 - **User Authentication**: Secure JWT-based authentication with role-based access control
 - **Complaint Management**: Create, track, and manage complaints with real-time status updates
 - **Department-Specific Routing**: Route complaints to appropriate departments
@@ -412,6 +411,191 @@ jansewa/
 
 ---
 
+## �️ Location & Map Features
+
+JanSewa includes integrated mapping capabilities:
+
+### Features:
+- **Complaint Location Tracking**: Map integration to record complaint location
+- **Leaflet Maps**: Open-source mapping library for interactive maps
+- **Location Display**: View complaint locations on interactive maps
+- **GeoJSON Support**: Standard geospatial data format support
+
+### Map Routes
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|-----------------|
+| GET | `/map/location/:complaintId` | Get complaint location | ✅ Yes |
+| POST | `/map/location` | Save location data | ✅ Yes |
+
+### Libraries:
+- **Leaflet**: v1.9.4 (mapping library)
+- **React Leaflet**: v5.0.0 (React bindings for Leaflet)
+
+---
+
+## 📧 Email Notifications
+
+The system sends automated email notifications using **Nodemailer**:
+
+### Notification Triggers:
+- **Complaint Submitted**: Confirmation email to user
+- **Status Updates**: Email when complaint status changes
+- **Assignment Notification**: Email when complaint is assigned to department
+- **Resolution Notification**: Email when complaint is resolved
+
+### Configuration:
+```bash
+# Email service configuration in .env
+SMTP_SERVICE=gmail  # or another provider
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+SMTP_FROM_EMAIL=noreply@jansewa.com
+```
+
+### Email Service Providers:
+- **Gmail**: Requires App Password (not regular password)
+- **SendGrid, Mailgun, AWS SES**: Alternative providers (update `SMTP_SERVICE`)
+
+---
+
+## 🧪 Testing & Development
+
+### Code Quality
+
+```bash
+# Lint frontend code
+npm run lint --prefix client
+
+# Lint backend code
+npm run lint --prefix server
+```
+
+### Database Seeding
+
+```bash
+# Seed initial admin user
+npm run seed:admin --prefix server
+```
+
+This creates a default admin account for testing (credentials specified in `seed:admin` script).
+
+---
+
+## 🌍 Multi-Language Support
+
+JanSewa supports multiple languages through React Context API:
+
+### Implementation:
+- **LanguageContext**: Manages language state across the application
+- **Translations File**: [utils/translations.js](client/src/utils/translations.js)
+- **Language Switching**: Easy language toggle in navbar
+
+### Supported Features:
+- UI text translation
+- Form labels and placeholders
+- Error messages
+- Notification messages
+- Email content localization
+
+### Adding New Language:
+1. Update `translations.js` with new language strings
+2. Add language option to language context
+3. Update navbar language selector
+
+---
+
+## 🎨 Frontend Pages & Components
+
+### Pages Available:
+
+| Page | Route | Purpose | Auth Required |
+|------|-------|---------|-----------------|
+| **Home** | `/` | Landing page | ❌ No |
+| **Login** | `/login` | User authentication | ❌ No |
+| **Register** | `/register` | New user registration | ❌ No |
+| **Dashboard** | `/dashboard` | User's complaint dashboard | ✅ Yes (Citizen) |
+| **Create Complaint** | `/complaint/new` | Submit new complaint | ✅ Yes (Citizen) |
+| **Complaint Details** | `/complaint/:id` | View complaint details | ✅ Yes |
+| **Profile** | `/profile` | User profile management | ✅ Yes |
+| **Admin Dashboard** | `/admin` | Admin statistics & management | ✅ Yes (Admin) |
+| **Admin Users** | `/admin/users` | Manage all users | ✅ Yes (Admin) |
+| **Admin Complaints** | `/admin/complaints` | Manage all complaints | ✅ Yes (Admin) |
+| **Department** | `/department` | Department dashboard | ✅ Yes (Department) |
+| **404** | `/not-found` | Page not found | ❌ No |
+
+### Key Components:
+
+**Layout Components:**
+- `Navbar`: Navigation bar with language switcher
+- `AdminLayout`: Layout wrapper for admin pages
+- `AuthLayout`: Layout for authentication pages
+- `DashboardLayout`: Layout for dashboard pages
+- `DepartmentLayout`: Layout for department pages
+
+**UI Components:**
+- `BarChart`: Data visualization with bar charts
+- `DonutChart`: Pie/donut chart visualization
+- `FormField`: Reusable form input component
+- `AIChatWidget`: AI chat interface for users
+- `AdminComingSoon`, `DashboardComingSoon`, `DepartmentComingSoon`: Placeholder pages
+
+**Card Components:**
+- Complaint cards
+- Statistics cards
+- Department cards
+- User cards
+
+---
+
+## 📱 Responsive Design
+
+JanSewa uses **Tailwind CSS** for responsive design:
+
+### Breakpoints:
+- **Mobile**: < 640px
+- **Tablet**: 640px - 1024px
+- **Desktop**: > 1024px
+
+All pages and components are fully responsive and mobile-friendly.
+
+---
+
+## 🔍 Deployment Considerations
+
+### Environment-Specific Configuration
+
+**Development (.env files)**:
+- Use local MongoDB or Atlas connection
+- Enable debug logging via Morgan
+- Use development API keys
+
+**Production**:
+- Use MongoDB Atlas for scalability
+- Set `NODE_ENV=production`
+- Use strong `JWT_SECRET`
+- Enable HTTPS
+- Configure rate limiting appropriately
+- Monitor logs and errors
+
+### Frontend Deployment
+
+Vite creates optimized production builds:
+```bash
+npm run build:client
+# Outputs to: client/dist/
+# Deploy dist/ folder to hosting (Vercel, Netlify, etc.)
+```
+
+### Backend Deployment
+
+Use production-ready Node.js server:
+```bash
+NODE_ENV=production npm start --prefix server
+# Or use process managers: PM2, Forever, etc.
+```
+
+---
+
 ## 🛠️ Technologies Used
 
 ### Frontend Stack
@@ -447,7 +631,132 @@ jansewa/
 
 ---
 
-## 🐛 Troubleshooting
+## �️ Database Models & Schema
+
+### User Model
+- **Fields**: `_id`, `name`, `email`, `password` (hashed), `phone`, `role`, `department`, `profileImage`, `isVerified`, `createdAt`, `updatedAt`
+- **Roles**: `citizen`, `department`, `admin`
+- **Relationships**: A user can create multiple complaints and receive notifications
+
+### Complaint Model
+- **Fields**: `_id`, `title`, `description`, `status`, `category`, `priority`, `images`, `location`, `assignedTo`, `submittedBy`, `department`, `resolutionNotes`, `createdAt`, `updatedAt`
+- **Status**: `pending`, `in_progress`, `resolved`, `rejected`, `on_hold`
+- **Relationships**: Belongs to User (submittedBy), Department, and can have multiple Notifications
+
+### Department Model
+- **Fields**: `_id`, `name`, `description`, `contactEmail`, `contactPhone`, `head`, `createdAt`, `updatedAt`
+- **Relationships**: Receives complaints and manages users
+
+### Notification Model
+- **Fields**: `_id`, `userId`, `complaintId`, `message`, `type`, `isRead`, `createdAt`, `updatedAt`
+- **Types**: `complaint_created`, `status_updated`, `complaint_resolved`, `system_notification`
+
+---
+
+## 🔐 Security Features
+
+- **Authentication**: JWT-based authentication with secure token generation
+- **Password Security**: Bcryptjs hashing with salt rounds
+- **Authorization**: Role-based access control (RBAC) for users, departments, and admins
+- **Security Headers**: Helmet.js for setting secure HTTP headers
+- **CORS Protection**: Configurable cross-origin resource sharing
+- **Rate Limiting**: Express rate-limit to prevent brute-force attacks and DoS
+- **Input Validation**: Request validation middleware for all endpoints
+- **Error Handling**: Centralized error handling with custom error classes
+- **Environment Variables**: Sensitive data stored in `.env` files (not committed to git)
+
+---
+## 🔧 Backend Architecture Details
+
+### Middleware Stack
+
+| Middleware | Purpose | File |
+|-----------|---------|------|
+| **Helmet** | Security headers | `helmet()` |
+| **CORS** | Cross-origin requests | `cors()` |
+| **Morgan** | HTTP logging | `morgan()` |
+| **Rate Limit** | Brute-force protection | `express-rate-limit` |
+| **Sanitize Body** | Input sanitization | `sanitizeBody.js` |
+| **Auth** | JWT verification | `auth.js` |
+| **Role** | Authorization checks | `roleMiddleware.js` |
+| **Upload** | File upload handling | `uploadMiddleware.js` |
+| **Validate** | Request validation | `validateRequest.js` |
+| **Error Handler** | Centralized error handling | `errorHandler.js` |
+
+### Request Validation
+
+JanSewa includes comprehensive input validation:
+
+**Validators:**
+- `authValidator.js`: Register/Login validation
+- `complaintValidator.js`: Complaint submission validation
+
+**Validation Checks:**
+- Email format validation
+- Password strength requirements
+- Required field validation
+- Data type validation
+- String length limits
+
+### Response Format
+
+All API responses follow a consistent format:
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Operation completed successfully",
+  "data": { /* response data */ }
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "message": "Error description",
+  "errors": [ /* error details */ ]
+}
+```
+
+### Async Error Handling
+
+The `asyncHandler` utility wraps async route handlers:
+```javascript
+// Automatically catches errors and passes to error middleware
+const handler = asyncHandler(async (req, res) => {
+  // async code here
+});
+```
+
+---
+
+## 🖼️ Image Upload & Storage
+
+### Cloudinary Integration
+
+- **Service**: Cloud-based image storage and CDI
+- **File Types**: JPEG, PNG, WebP, GIF
+- **Max Size**: Configurable (typically 5MB)
+- **Optimization**: Automatic image optimization by Cloudinary
+
+### Upload Middleware Features:
+- File size validation
+- MIME type checking
+- Image transformation
+- Secure URL generation
+
+### Configuration:
+```bash
+# .env file
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+---
+## �🐛 Troubleshooting
 
 ### Issue: "Cannot find module" errors
 
@@ -655,12 +964,229 @@ vercel
 - [ ] Dependencies installed (`npm run install:all`)
 - [ ] Environment variables configured (`.env` files created)
 - [ ] MongoDB running (local or Atlas)
-- [ ] Backend running (`npm run dev:server`)
-- [ ] Frontend running (`npm run dev:client`)
-- [ ] Application accessible at http://localhost:3000
+- [ ] Backend running (`npm run dev:server`) — accessible at **http://localhost:5000/api**
+- [ ] Frontend running (`npm run dev:client`) — accessible at **http://localhost:5173**
+- [ ] Application working and ready to use
 
 ---
 
-**Happy coding! 🎉**
+## 📄 License
 
-If you found this helpful, please star ⭐ the repository and share with others!
+This project is licensed under the **MIT License** — see the LICENSE file for details.
+
+---
+
+## 🎯 Project Use Case
+
+**JanSewa** addresses a critical need in public service management. It is designed for:
+
+- **Citizens**: Easily report public service issues (potholes, broken streetlights, water leaks, etc.)
+- **Departments**: Efficiently manage and resolve complaints assigned to their department
+- **Administrators**: Monitor system-wide complaints and user management
+- **Government Agencies**: Track service request metrics and response times
+
+### Real-World Applications:
+- Municipal complaint management
+- Government service portals
+- Citizen engagement platforms
+- Public grievance redressal systems
+- Urban management and maintenance coordination
+
+---
+
+## 📚 Best Practices
+
+### Code Style
+
+1. **Frontend**:
+   - Use functional components with hooks
+   - Follow React naming conventions (PascalCase for components)
+   - Keep components focused and reusable
+   - Use context for global state management
+
+2. **Backend**:
+   - Follow RESTful API conventions
+   - Use async/await for asynchronous code
+   - Implement proper error handling
+   - Keep business logic in controllers
+   - Use middleware for cross-cutting concerns
+
+### Security Best Practices
+
+1. **Never commit `.env` files**
+2. **Validate all user inputs** server-side
+3. **Use strong passwords** and JWT secrets
+4. **Keep dependencies updated** - run `npm audit` regularly
+5. **Use HTTPS** in production
+6. **Implement rate limiting** on APIs
+7. **Sanitize database queries** to prevent injection
+8. **Store sensitive data** in environment variables
+
+### Performance Tips
+
+1. **Frontend**:
+   - Use React lazy loading for routes
+   - Optimize images before upload
+   - Minimize bundle size
+   - Use async components loading
+
+2. **Backend**:
+   - Create proper MongoDB indexes
+   - Implement pagination for list endpoints
+   - Cache frequently accessed data
+   - Monitor query performance
+
+3. **Database**:
+   - Use MongoDB indexes strategically
+   - Avoid N+1 query problems
+   - Archive old complaints periodically
+   - Monitor database size
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! If you have suggestions or want to contribute:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'Add your feature'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Open a Pull Request
+
+---
+
+## 📧 Support & Contact
+
+For issues, questions, or suggestions:
+
+- **Open an Issue**: [GitHub Issues](https://github.com/Divya-Bhandari/jansewa/issues)
+- **Email**: [project maintainer email]
+- **Discussions**: Use GitHub Discussions for feature requests
+
+---
+
+## ❓ FAQ
+
+### Q: How do I reset my password?
+**A**: Users can reset their password through the login page by clicking "Forgot Password" link. A reset email will be sent to their registered email address.
+
+### Q: Can I use this system without Google Gemini?
+**A**: The core complaint management features work without AI. Disable or mock the AI chat routes if API key is not available. However, AI-powered assistance won't be available.
+
+### Q: How do I manage user roles?
+**A**: Admin users can assign roles (citizen, department, admin) to users through the admin dashboard. Roles determine what features and data users can access.
+
+### Q: How is my complaint location tracked?
+**A**: Complaints include optional location data captured via Leaflet maps. Users can set complaint location by clicking on the map or entering coordinates.
+
+### Q: Can departments be added dynamically?
+**A**: Yes, the `Department` model is flexible. Admins can create/edit departments through admin APIs. Update the constants if predefined categories are needed.
+
+### Q: How do I backup my MongoDB data?
+**A**: 
+```bash
+# Export MongoDB data
+mongodump --db jansewa --out ./backup
+
+# Import MongoDB data
+mongorestore --db jansewa ./backup/jansewa
+```
+
+### Q: Can I deploy this on shared hosting?
+**A**: JanSewa requires Node.js hosting. Recommended platforms: Heroku, Railway, DigitalOcean, AWS, or any VPS with Node.js support. Shared hosting typically won't work.
+
+### Q: How do I enable production builds locally?
+**A**:
+```bash
+# Build frontend
+npm run build:client
+
+# Run backend in production mode
+NODE_ENV=production npm start --prefix server
+```
+
+### Q: How do I contribute to this project?
+**A**: See the [Contributing](#-contributing) section above. Follow the standard fork → feature branch → pull request workflow.
+
+---
+
+## 📊 Project Statistics
+
+- **Frontend**: React with Vite
+- **Backend**: Express.js with Node.js
+- **Database**: MongoDB
+- **Lines of Code**: ~5000+ (frontend + backend)
+- **Components**: 20+ reusable React components
+- **API Endpoints**: 30+ RESTful endpoints
+- **Test Coverage**: Scalable test infrastructure ready
+
+---
+
+## 🎓 Learning Resources
+
+### Useful Documentation Links:
+
+- [React Documentation](https://react.dev)
+- [Express.js Guide](https://expressjs.com/)
+- [MongoDB Manual](https://docs.mongodb.com/manual/)
+- [Mongoose Guide](https://mongoosejs.com/)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Google Generative AI](https://ai.google.dev/)
+- [Cloudinary Docs](https://cloudinary.com/documentation)
+
+---
+
+## 🚀 Development Workflow
+
+### Setting Up Your Development Environment
+
+1. **Fork and Clone**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/jansewa.git
+   cd jansewa
+   ```
+
+2. **Create Feature Branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   npm run install:all
+   ```
+
+4. **Configure Environment**
+   - Create `.env` files in both `client` and `server` directories
+   - Copy example configurations from documentation
+
+5. **Start Development Servers**
+   ```bash
+   # Terminal 1: Backend
+   npm run dev:server
+   
+   # Terminal 2: Frontend
+   npm run dev:client
+   ```
+
+6. **Make Changes & Test**
+   - Write code
+   - Test thoroughly
+   - Run linters: `npm run lint --prefix client`
+
+7. **Commit & Push**
+   ```bash
+   git add .
+   git commit -m "Feature: Description of changes"
+   git push origin feature/your-feature-name
+   ```
+
+
+
+
+
+
+
+
+
