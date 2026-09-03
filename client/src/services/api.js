@@ -10,8 +10,19 @@
 
 import axios from "axios";
 
+let baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+// If accessing the app via a local network IP instead of localhost,
+// assume the backend is running on the same network IP on port 5000.
+if (typeof window !== "undefined") {
+  const hostname = window.location.hostname;
+  if (baseURL.includes("localhost") && hostname !== "localhost" && hostname !== "127.0.0.1") {
+    baseURL = `http://${hostname}:5000/api`;
+  }
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL,
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
