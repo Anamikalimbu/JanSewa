@@ -50,7 +50,12 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const loggedInUser = await login({ ...form, role: portal });
-      navigate(loggedInUser?.role === "admin" ? "/admin" : "/home");
+      const destination = loggedInUser?.role === "admin"
+        ? "/admin"
+        : loggedInUser?.role === "department"
+          ? "/department"
+          : "/home";
+      navigate(destination);
     } catch (err) {
       setSubmitError(
         err?.response?.data?.message || "Couldn't sign you in. Check your credentials and try again."
@@ -80,11 +85,11 @@ export default function LoginPage() {
     >
       {/* Citizen / Admin portal selector */}
       <div style={{
-        display: "flex", background: "var(--background)", borderRadius: 10, padding: 4, marginBottom: 22,
+        display: "flex", background: "var(--background)", borderRadius: 10, padding: 4, marginBottom: 16,
       }}>
         {[
-          { key: "citizen", label: "Citizen" },
-          { key: "admin", label: "Admin / Staff" },
+          { key: "citizen", label: "Citizen Portal" },
+          { key: "admin", label: "Admin / Staff Portal" },
         ].map(({ key, label }) => (
           <button
             key={key}
