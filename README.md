@@ -6,6 +6,7 @@ An intelligent complaint management system powered by AI (Google Gemini) that he
 
 ## ✨ Features
 
+- **AI-Powered Assistance**: Google Gemini AI integration for intelligent complaint analysis
 - **User Authentication**: Secure JWT-based authentication with role-based access control
 - **Complaint Management**: Create, track, and manage complaints with real-time status updates
 - **Department-Specific Routing**: Route complaints to appropriate departments
@@ -408,6 +409,23 @@ jansewa/
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|-----------------|
 | POST | `/chat` | Send chat message to AI | ✅ Yes |
+
+---
+
+## 🤖 AI Chat Integration
+
+JanSewa integrates **Google Gemini AI** for intelligent assistant features:
+
+### Features:
+- **Smart Complaint Analysis**: AI analyzes complaint text and suggests categories
+- **Helpful Responses**: AI provides guidance on complaint resolution
+- **Real-time Chat**: Interactive chat widget with Google Gemini
+- **Context-Aware Responses**: AI understands complaint context and user history
+
+### Configuration:
+- **API**: Uses `@google/generative-ai` package (v0.24.1)
+- **Model**: Google Generative AI (Gemini)
+- **Requires**: `GEMINI_API_KEY` environment variable
 
 ---
 
@@ -1181,12 +1199,4 @@ NODE_ENV=production npm start --prefix server
    git commit -m "Feature: Description of changes"
    git push origin feature/your-feature-name
    ```
-
-
-
-
-
-
-
-
-
+   
