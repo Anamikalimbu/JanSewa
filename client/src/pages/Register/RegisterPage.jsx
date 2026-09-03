@@ -56,6 +56,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [deptLoading, setDeptLoading] = useState(false);
@@ -112,18 +113,23 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError("");
+    setSubmitSuccess("");
     if (!validate()) return;
 
     setLoading(true);
     try {
-      await register({
+      const result = await register({
         name: form.name,
         email: form.email,
         password: form.password,
         role: form.role,
         ...(form.role === "department" ? { departmentId: form.departmentId } : {}),
       });
-      navigate(form.role === "admin" ? "/admin" : form.role === "department" ? "/department" : "/home");
+      if (result && result.pending) {
+        setSubmitSuccess(result.message);
+      } else {
+        navigate(form.role === "admin" ? "/admin" : form.role === "department" ? "/department" : "/home");
+      }
     } catch (err) {
       setSubmitError(
         err?.response?.data?.message || "Couldn't create your account. Please try again."
@@ -147,6 +153,36 @@ export default function RegisterPage() {
         </>
       }
     >
+      {submitSuccess ? (
+        <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: "50%", background: "rgba(0,128,128,0.1)",
+            color: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 16px"
+          }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
+          <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>
+            Request Submitted
+          </h3>
+          <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: 24 }}>
+            {submitSuccess}
+          </p>
+          <Link
+            to="/login"
+            style={{
+              display: "inline-block", width: "100%", padding: "12px", borderRadius: 10,
+              background: "var(--primary)", color: "#fff", fontWeight: 600, fontSize: 14.5,
+              textDecoration: "none", boxShadow: "0 4px 14px rgba(0,128,128,0.35)",
+            }}
+          >
+            Back to Login
+          </Link>
+        </div>
+      ) : (
       <form onSubmit={handleSubmit} noValidate>
         {/* Role selector */}
         <div style={{ marginBottom: 18 }}>
@@ -308,6 +344,7 @@ export default function RegisterPage() {
           {loading ? "Creating account…" : "Register"}
         </button>
       </form>
+      )}
     </AuthLayout>
   );
 }
