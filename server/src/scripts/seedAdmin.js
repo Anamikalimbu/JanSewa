@@ -68,6 +68,7 @@ const run = async () => {
     password,
     role: ROLES.ADMIN,
     isActive: true,
+    accountStatus: "approved",
   });
 
   console.log("\n✔ Admin account created successfully.\n");
