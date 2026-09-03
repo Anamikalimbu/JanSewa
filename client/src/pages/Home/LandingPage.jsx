@@ -431,7 +431,7 @@ const translations = {
 };
 
 function HeroSlider() {
-  const images = ["/images/hero.jpg", "/images/hero1.webp", "/images/hero2.jpg", "/images/hero3.jpg"];
+  const images = ["/images/hero.jpg", "/images/hero1.jpg", "/images/hero2.jpg", "/images/hero3.jpg"];
   const sliderRef = useRef(null);
   const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
 
@@ -495,7 +495,7 @@ function HeroSlider() {
         {images.map((src, i) => (
           <div key={i} className="hide-scrollbar" style={{
             flex: "0 0 100%", height: "100%", scrollSnapAlign: "start",
-            backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center",
+            backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center center",
             pointerEvents: "none" // prevents images from being dragged natively
           }} />
         ))}
@@ -637,7 +637,7 @@ export default function LandingPage() {
       {/*  HERO  */}
       <section id="home" style={{
         width: "100%", boxSizing: "border-box",
-        position: "relative", overflow: "hidden", minHeight: "85vh",
+        position: "relative", overflow: "hidden", height: "clamp(520px, 78vh, 720px)",
         display: "flex", alignItems: "center"
       }}>
         <HeroSlider />
