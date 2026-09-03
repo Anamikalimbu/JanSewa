@@ -125,10 +125,7 @@ router.get(
 router.get(
   "/pending-users",
   asyncHandler(async (req, res) => {
-    const users = await User.find({
-      accountStatus: "pending",
-      role: { $in: [ROLES.DEPARTMENT, ROLES.ADMIN] },
-    })
+    const users = await User.find({ accountStatus: "pending" })
       .populate("departmentId", "departmentName")
       .sort({ createdAt: -1 });
     sendSuccess(res, 200, "Pending users fetched", { users });
@@ -162,8 +159,8 @@ router.patch(
         subject: "JanSewa Account Approved",
         html: `<p>Hi ${user.name},</p><p>Your account request has been approved. You can now log in.</p><p><a href="${loginUrl}">${loginUrl}</a></p>`,
       });
-    } catch (emailError) {
-      console.error(`Approval email failed for ${user.email}:`, emailError.message);
+    } catch (err) {
+      console.error("Failed to send approval email:", err);
     }
 
     sendSuccess(res, 200, "User approved successfully.", { user });
@@ -198,8 +195,8 @@ router.patch(
         subject: "JanSewa Account Request Update",
         html: `<p>Hi ${user.name},</p><p>Your account request was not approved.</p>${reason}<p>Contact the administrator for more details.</p>`,
       });
-    } catch (emailError) {
-      console.error(`Rejection email failed for ${user.email}:`, emailError.message);
+    } catch (err) {
+      console.error("Failed to send rejection email:", err);
     }
 
     sendSuccess(res, 200, "User rejected successfully.", { user });

@@ -9,7 +9,9 @@ const fs = require("fs");
 const Complaint = require("../models/Complaint");
 const Department = require("../models/Department");
 const Notification = require("../models/Notification");
-const dispatchNotification = require("../utils/notificationDispatcher");
+const User = require("../models/User");
+const sendEmail = require("../utils/sendEmail");
+const { getComplaintSubmittedEmail, getComplaintStatusEmail } = require("../utils/emailTemplates");
 const CATEGORY_META = require("../constants/categoryMeta");
 const { COMPLAINT_STATUSES, NOTIFICATION_TYPES } = require("../constants");
 
@@ -363,12 +365,21 @@ router.post(
       statusHistory: [{ status: COMPLAINT_STATUSES.PENDING, note: "Complaint submitted." }],
     });
 
-    await dispatchNotification({
-      recipient: req.user,
-      type: NOTIFICATION_TYPES.COMPLAINT_CREATED,
+    await Notification.create({
+      userId: req.user._id,
       message: `Your complaint "${complaint.title}" has been submitted and is pending review.`,
-      complaint,
+      type: NOTIFICATION_TYPES.COMPLAINT_CREATED,
+      complaintId: complaint._id,
     });
+
+    try {
+      await sendEmail({
+        to: req.user.email,
+        ...getComplaintSubmittedEmail(req.user.name, complaint)
+      });
+    } catch (err) {
+      console.error("Failed to send complaint submission email:", err);
+    }
 
     sendSuccess(res, 201, "Complaint submitted successfully.", {
       complaint: toListItem(complaint),
@@ -431,17 +442,6 @@ router.post(
     });
     await complaint.save();
 
-    // If an officer/admin replies, notify the citizen who submitted the complaint
-    if (String(complaint.userId) !== String(req.user._id)) {
-      await dispatchNotification({
-        recipient: complaint.userId,
-        type: NOTIFICATION_TYPES.STATUS_UPDATED,
-        message: `${req.user.name} replied to your complaint "${complaint.title}".`,
-        complaint,
-        extraNote: message.trim(),
-      });
-    }
-
     sendSuccess(res, 201, "Comment added.", { comments: complaint.comments });
   })
 );
@@ -499,13 +499,24 @@ router.patch(
     complaint.statusHistory.push({ status, note: note || "" });
     await complaint.save();
 
-    await dispatchNotification({
-      recipient: complaint.userId,
+    await Notification.create({
+      userId: complaint.userId,
+      message: `Your complaint "${complaint.title}" is now marked as ${status}.`,
       type: NOTIFICATION_TYPES.STATUS_UPDATED,
-      message: `Your complaint "${complaint.title}" status is now marked as ${status}.`,
-      complaint,
-      extraNote: note || "",
+      complaintId: complaint._id,
     });
+
+    try {
+      const owner = await User.findById(complaint.userId).select("email name");
+      if (owner) {
+        await sendEmail({
+          to: owner.email,
+          ...getComplaintStatusEmail(owner.name, status, complaint.title, complaint._id, note)
+        });
+      }
+    } catch (err) {
+      console.error("Failed to send complaint status email:", err);
+    }
 
     sendSuccess(res, 200, "Complaint status updated.", { complaint });
   })
@@ -549,16 +560,6 @@ router.patch(
 
     await complaint.save();
     const populated = await complaint.populate("departmentId", "departmentName");
-
-    if (departmentId) {
-      const deptName = populated.departmentId?.departmentName || "department";
-      await dispatchNotification({
-        recipient: complaint.userId,
-        type: NOTIFICATION_TYPES.COMPLAINT_ASSIGNED,
-        message: `Your complaint "${complaint.title}" has been assigned to ${deptName}.`,
-        complaint: populated,
-      });
-    }
 
     sendSuccess(res, 200, "Department assignment updated.", {
       complaint: { ...toListItem(populated) },

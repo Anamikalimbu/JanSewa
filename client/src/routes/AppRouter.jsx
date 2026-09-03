@@ -26,7 +26,6 @@ import DepartmentDashboardPage from "../pages/Admin/Department/DepartmentDashboa
 import DepartmentAssignedPage from "../pages/Admin/Department/DepartmentAssignedPage";
 import DepartmentDepartmentsPage from "../pages/Admin/Department/DepartmentDepartmentsPage";
 import DepartmentReportsPage from "../pages/Admin/Department/DepartmentReportsPage";
-import ChatPage from "../pages/Chat/ChatPage";
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -38,7 +37,6 @@ const AppRouter = () => (
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       <Route path="/track" element={<TrackComplaintsPage />} />
-      <Route path="/chat" element={<ChatPage />} />
       <Route path="/complaints" element={<MyComplaintsPage />} />
       <Route path="/complaints/new" element={<SubmitComplaintPage />} />
       <Route path="/map" element={<ComplaintsMapPage />} />

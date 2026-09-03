@@ -2,10 +2,21 @@ const User = require("../models/User");
 const Department = require("../models/Department");
 const { ROLES } = require("../constants");
 
+const getExistingIndexes = async (collection) => {
+  try {
+    return await collection.indexes();
+  } catch (error) {
+    if (error.codeName === "NamespaceNotFound" || error.code === 26) {
+      return [];
+    }
+    throw error;
+  }
+};
+
 const seedDefaults = async () => {
   try {
     // Remove the obsolete unique index left by the former `name` field.
-    const departmentIndexes = await Department.collection.indexes();
+    const departmentIndexes = await getExistingIndexes(Department.collection);
     for (const obsoleteIndex of ["name_1", "code_1"]) {
       if (departmentIndexes.some((index) => index.name === obsoleteIndex)) {
         await Department.collection.dropIndex(obsoleteIndex);
@@ -13,7 +24,7 @@ const seedDefaults = async () => {
       }
     }
 
-    const userIndexes = await User.collection.indexes();
+    const userIndexes = await getExistingIndexes(User.collection);
     if (userIndexes.some((index) => index.name === "phone_1")) {
       await User.collection.dropIndex("phone_1");
       console.log("✔ Removed obsolete users.phone index");

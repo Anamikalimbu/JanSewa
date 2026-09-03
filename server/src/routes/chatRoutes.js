@@ -39,8 +39,11 @@ const buildSystemInstruction = (user, myComplaints, categoryList) => {
       'and priority, then tell them to confirm it on the "Submit Complaint" page (you can\'t submit forms or upload photos).',
     "- When asked about a specific complaint status, use the list above; if it's not there, say you can't find it under their account.",
     "- Reply in the same language the citizen writes in (English or Nepali).",
+    "- If the citizen writes in a language other than English or Nepali, do your best to reply in that language if you can; if not, reply in English and briefly note that you're most reliable in English and Nepali.",
     "- Keep replies short: 2-5 sentences, or a tight bullet list. No markdown headers, minimal formatting.",
     "- Never invent complaint data that isn't in the list above.",
+    "- If the citizen's message is unclear, too short to understand, or looks like random text, ask a short clarifying question instead of guessing.",
+    "- If the citizen asks something unrelated to JanSewa or civic complaints, answer briefly and politely if you can, then gently steer back to what you can help with (reporting issues, checking complaint status, using the platform) — never refuse to respond."
   ].join("\n");
 };
 
@@ -56,6 +59,10 @@ router.post(
 
     if (!message || !message.trim()) {
       throw new AppError("Message is required", 400);
+    }
+
+    if (message.trim().length > 2000) {
+      throw new AppError("Message is too long. Please keep it under 2000 characters.", 400);
     }
 
     // Pull a small, relevant slice of this citizen's own complaints for context.

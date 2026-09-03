@@ -63,7 +63,9 @@ export default function AIChatWidget() {
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (!sending && input.trim()) {
+        handleSend();
+      }
     }
   };
 

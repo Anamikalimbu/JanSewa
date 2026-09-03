@@ -11,10 +11,10 @@ const MAX_IMAGES = 5;
 const MAX_SIZE_MB = 5;
 const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-// Default center: Dharan, Sunsari, Koshi Province, Nepal (matches
-// the platform's primary service area).
+// Same default center used by the Complaints Map page (Dharan, Sunsari, Koshi Province)
+// so a freshly-opened picker starts somewhere relevant to the platform.
 const DEFAULT_CENTER = [26.8129, 87.2836];
-const DEFAULT_ZOOM = 13;
+const DEFAULT_ZOOM = 12;
 
 // react-leaflet's default marker icon references image files that Vite
 // doesn't bundle correctly out of the box — point it at the CDN copies

@@ -32,7 +32,6 @@ const en = {
   nav_dashboard: "Dashboard",
   nav_myComplaints: "My Complaints",
   nav_submitComplaint: "Submit Complaint",
-  nav_map: "Complaints Map",
   nav_notifications: "Notifications",
   nav_profile: "Profile",
   nav_settings: "Settings",
@@ -132,6 +131,17 @@ const en = {
   status_resolved: "Resolved",
   status_closed: "Closed",
   timeline_submitted: "Complaint Submitted",
+
+  // AI Chat Widget
+  chat_title: "JanSewa Assistant",
+  chat_subtitle: "Ask me anything about JanSewa",
+  chat_greeting: "Hello! I am the JanSewa Assistant. I can help you report an issue, check your complaint status, or answer general questions about using JanSewa. How can I help you today?",
+  chat_placeholder: "Type a message...",
+  chat_send: "Send Message",
+  chat_thinking: "Thinking...",
+  chat_error: "Something went wrong. Please try again.",
+  chat_openAria: "Open AI Assistant chat",
+  chat_closeAria: "Close AI Assistant chat",
 };
 
 const ne = {
@@ -151,7 +161,6 @@ const ne = {
   nav_dashboard: "ड्यासबोर्ड",
   nav_myComplaints: "मेरा उजुरीहरू",
   nav_submitComplaint: "उजुरी पेश गर्नुहोस्",
-  nav_map: "उजुरी नक्सा",
   nav_notifications: "सूचनाहरू",
   nav_profile: "प्रोफाइल",
   nav_settings: "सेटिङहरू",
@@ -247,6 +256,16 @@ const ne = {
   status_resolved: "समाधान भयो",
   status_closed: "बन्द भयो",
   timeline_submitted: "उजुरी पेश गरियो",
+
+  chat_title: "जनसेवा सहायक",
+  chat_subtitle: "जनसेवाको बारेमा मलाई जे पनि सोध्नुहोस्",
+  chat_greeting: "नमस्ते! म जनसेवा सहायक हुँ। म तपाईंलाई समस्या दर्ता गर्न, उजुरीको स्थिति जाँच गर्न, वा जनसेवा प्रयोग गर्ने बारे सामान्य प्रश्नहरूको उत्तर दिन मद्दत गर्न सक्छु। म तपाईंलाई आज कसरी मद्दत गर्न सक्छु?",
+  chat_placeholder: "सन्देश लेख्नुहोस्...",
+  chat_send: "सन्देश पठाउनुहोस्",
+  chat_thinking: "सोच्दै...",
+  chat_error: "केही गलत भयो। कृपया फेरि प्रयास गर्नुहोस्।",
+  chat_openAria: "एआई सहायक च्याट खोल्नुहोस्",
+  chat_closeAria: "एआई सहायक च्याट बन्द गर्नुहोस्",
 };
 
 export const translations = { [LANGUAGES.EN]: en, [LANGUAGES.NE]: ne };

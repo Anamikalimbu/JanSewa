@@ -18,8 +18,7 @@ const iconPaths = {
   chevron:  "M6 9l6 6 6-6",
   map:      "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z M8 2v16 M16 6v16",
   menu:     "M3 12h18M3 6h18M3 18h18",
-  close:    "M6 18L18 6M6 6l12 12",
-  chat:     "M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"
+  close:    "M6 18L18 6M6 6l12 12"
 };
 
 const Icon = ({ d, size = 18, className = "", ...rest }) => (
@@ -32,7 +31,6 @@ const navItems = [
   { to: "/home",             labelKey: "nav_dashboard",        icon: "grid" },
   { to: "/complaints",       labelKey: "nav_myComplaints",     icon: "list" },
   { to: "/complaints/new",   labelKey: "nav_submitComplaint",  icon: "plus" },
-  { to: "/chat",             labelKey: "AI Assistant Chat",    icon: "chat" },
   { to: "/map",              labelKey: "nav_map",              icon: "map" },
   { to: "/notifications",    labelKey: "nav_notifications",    icon: "bell", showBadge: true },
   { to: "/profile",          labelKey: "nav_profile",          icon: "user" },
@@ -224,6 +222,7 @@ export default function DashboardLayout({ children }) {
           {children}
         </main>
       </div>
+
       <AIChatWidget />
     </div>
   );

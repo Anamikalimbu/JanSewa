@@ -68,9 +68,7 @@ const userSchema = new mongoose.Schema(
     accountStatus: {
       type: String,
       enum: ["approved", "pending", "rejected"],
-      default: function () {
-        return this.role === ROLES.CITIZEN ? "approved" : "pending";
-      },
+      default: "approved",
     },
 
     approvedBy: {
@@ -107,8 +105,6 @@ userSchema.index({ role: 1 });
 // admin panel, etc.), so an admin account can never end up with a
 // non-conforming email even if a controller forgets to check.
 userSchema.pre("validate", function () {
-  if (this.role === ROLES.CITIZEN) this.accountStatus = "approved";
-
   if (this.role === ROLES.ADMIN && !ADMIN_EMAIL_REGEX.test(this.email || "")) {
     throw new Error(
       "Admin accounts must use the reserved email pattern: admin.<name>@jansewa.gov.np"

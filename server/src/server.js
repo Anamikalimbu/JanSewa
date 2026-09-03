@@ -13,7 +13,6 @@
 require("dotenv").config();
 
 const connectDB = require("./config/db");
-const seedDefaults = require("./scripts/seedData");
 const app = require("./app");
 
 // If this doesn't match your .env file's CLIENT_URL, something in your
@@ -25,7 +24,6 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB, then start the server
 const startServer = async () => {
   await connectDB();
-  await seedDefaults();
 
   const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n JanSewa API running in ${process.env.NODE_ENV} mode on port ${PORT}`);

@@ -7,6 +7,7 @@ const { protect } = require("../middleware/auth");
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const { ROLES, ADMIN_EMAIL_REGEX } = require("../constants");
+const { getWelcomeEmail, getPendingRequestEmail, getNewLoginEmail } = require("../utils/emailTemplates");
 
 const router = express.Router();
 
@@ -27,18 +28,19 @@ router.post(
       throw new AppError("Name, email and password are required.", 400);
     }
 
-    const cleanEmail = String(email).trim().toLowerCase();
-    const cleanPassword = String(password);
-
-    const existing = await User.findOne({ email: cleanEmail });
+    const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
       throw new AppError("An account with this email already exists.", 409);
     }
 
+    // Admin is not a self-service role for just anyone with a matching
+    // email — it only exists so the reserved pattern below can be
+    // registered once by whoever holds that address. Anything that isn't
+    // "department" falls back to "citizen" as before.
     let requestedRole = role === ROLES.DEPARTMENT ? ROLES.DEPARTMENT : ROLES.CITIZEN;
 
     if (role === ROLES.ADMIN) {
-      if (!ADMIN_EMAIL_REGEX.test(cleanEmail)) {
+      if (!ADMIN_EMAIL_REGEX.test(email.toLowerCase())) {
         throw new AppError(
           "Admin registration requires a reserved admin email in the format admin.<name>@jansewa.gov.np",
           403
@@ -54,17 +56,28 @@ router.post(
     const isApprovalRequired = requestedRole === ROLES.DEPARTMENT || requestedRole === ROLES.ADMIN;
 
     const user = await User.create({
-      name: String(name).trim(),
-      email: cleanEmail,
-      phone: phone ? String(phone).trim() : undefined,
-      password: cleanPassword,
+      name,
+      email,
+      phone,
+      password,
       role: requestedRole,
       departmentId: requestedRole === ROLES.DEPARTMENT ? departmentId : null,
       accountStatus: isApprovalRequired ? "pending" : "approved",
     });
 
     if (isApprovalRequired) {
+      try {
+        await sendEmail({ to: user.email, ...getPendingRequestEmail(user.name) });
+      } catch (err) {
+        console.error("Failed to send pending request email:", err);
+      }
       return sendSuccess(res, 201, "Your account request has been submitted and is awaiting admin approval.");
+    }
+
+    try {
+      await sendEmail({ to: user.email, ...getWelcomeEmail(user.name) });
+    } catch (err) {
+      console.error("Failed to send welcome email:", err);
     }
 
     const token = user.generateAuthToken();
@@ -88,14 +101,11 @@ router.post(
       throw new AppError("Email and password are required.", 400);
     }
 
-    const cleanEmail = String(email).trim().toLowerCase();
-    const cleanPassword = String(password);
-
-    const user = await User.findOne({ email: cleanEmail })
+    const user = await User.findOne({ email: email.toLowerCase() })
       .select("+password")
       .populate("departmentId", "departmentName");
 
-    if (!user || !(await user.comparePassword(cleanPassword))) {
+    if (!user || !(await user.comparePassword(password))) {
       throw new AppError("Invalid email or password.", 401);
     }
     if (user.accountStatus === "pending") {
@@ -108,10 +118,22 @@ router.post(
       throw new AppError("This account has been deactivated.", 403);
     }
     if (user.role === ROLES.ADMIN && !ADMIN_EMAIL_REGEX.test(user.email)) {
+      // Belt-and-braces: an admin row should never exist with a
+      // non-conforming email, but if one ever does (bad data, manual
+      // DB edit), refuse to log it in as admin instead of trusting it.
       throw new AppError("This admin account is invalid. Contact the system owner.", 403);
     }
 
     const token = user.generateAuthToken();
+
+    try {
+      await sendEmail({
+        to: user.email,
+        ...getNewLoginEmail(user.name, new Date().toLocaleString())
+      });
+    } catch (err) {
+      console.error("Failed to send new login email:", err);
+    }
 
     sendSuccess(res, 200, "Logged in successfully.", {
       user: toAuthUser(user),
@@ -150,11 +172,15 @@ router.post(
 
       const resetUrl = `${process.env.CLIENT_URL || "http://localhost:3000"}/reset-password/${resetToken}`;
 
-      await sendEmail({
-        to: user.email,
-        subject: "Reset your JanSewa password",
-        html: `<p>Hi ${user.name},</p><p>Click the link below to reset your password. This link expires in 30 minutes.</p><p><a href="${resetUrl}">${resetUrl}</a></p>`,
-      });
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: "Reset your JanSewa password",
+          html: `<p>Hi ${user.name},</p><p>Click the link below to reset your password. This link expires in 30 minutes.</p><p><a href="${resetUrl}">${resetUrl}</a></p>`,
+        });
+      } catch (err) {
+        console.error("Failed to send password reset email:", err);
+      }
     }
 
     sendSuccess(res, 200, "If an account with that email exists, a reset link has been sent.");

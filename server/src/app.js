@@ -34,7 +34,6 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 const limiter = rateLimit({
   windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
   max: Number(process.env.RATE_LIMIT_MAX) || 200,
-  skip: () => process.env.NODE_ENV !== "production",
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: "Too many requests. Please try again later." },
@@ -113,7 +112,14 @@ app.use(`${API_PREFIX}/complaints`, complaintRoutes);
 app.use(`${API_PREFIX}/departments`, departmentRoutes);
 app.use(`${API_PREFIX}/notifications`, notificationRoutes);
 app.use(`${API_PREFIX}/map`, mapRoutes);
-app.use(`${API_PREFIX}/chat`, chatRoutes);
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: Number(process.env.CHAT_RATE_LIMIT_MAX) || 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: "You're sending messages too quickly. Please wait a moment." },
+});
+app.use(`${API_PREFIX}/chat`, chatLimiter, chatRoutes);
 app.use(`${API_PREFIX}/admin`, adminRoutes);
 
 // Error Handling (must be LAST)

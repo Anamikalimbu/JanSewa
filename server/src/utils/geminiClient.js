@@ -34,38 +34,60 @@ async function callGemini({ systemInstruction, turns, temperature = 0.4, maxOutp
     throw err;
   }
 
-  try {
-    const client = new GoogleGenAI({ apiKey });
-    const contents = turns.map((t) => ({
-      role: t.role === "model" ? "model" : "user",
-      parts: [{ text: t.text }],
-    }));
+  const ai = new GoogleGenAI({ apiKey });
 
-    const result = await client.models.generateContent({
-      model: GEMINI_MODEL,
-      contents,
-      config: {
-        systemInstruction: systemInstruction || undefined,
-        temperature,
-        maxOutputTokens,
-      },
-    });
-    const text = result.text || result.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text || "")
-      .join("");
+  const contents = turns.map((t) => ({
+    role: t.role === "model" ? "model" : "user",
+    parts: [{ text: t.text }],
+  }));
 
-    if (!text) {
-      const err = new Error("Gemini returned no content.");
-      err.statusCode = 502;
-      throw err;
+  let attempt = 0;
+  const maxRetries = 2;
+  const delays = [500, 1500];
+
+  while (true) {
+    try {
+      const response = await ai.models.generateContent({
+        model: GEMINI_MODEL,
+        contents,
+        config: {
+          systemInstruction,
+          temperature,
+          maxOutputTokens,
+        },
+      });
+
+      const text = response.text;
+
+      if (!text) {
+        throw new Error("Gemini returned no content.");
+      }
+
+      return text.trim();
+    } catch (err) {
+      const isTransient = err.status === 503 || err.status === 429 || 
+        (err.message && (err.message.includes("503") || err.message.includes("429") || err.message.includes("UNAVAILABLE") || err.message.includes("overloaded")));
+
+      if (isTransient && attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+        attempt++;
+        continue;
+      }
+
+      console.error("Gemini API Error:", err);
+      
+      if (isTransient) {
+        const wrapped = new Error("The AI assistant is busy right now. Please try again in a moment.");
+        wrapped.statusCode = 503;
+        wrapped.isOperational = true;
+        throw wrapped;
+      } else {
+        const wrapped = new Error("The AI assistant couldn't respond right now. Please try again.");
+        wrapped.statusCode = 502;
+        wrapped.isOperational = true;
+        throw wrapped;
+      }
     }
-
-    return text.trim();
-  } catch (err) {
-    if (err.statusCode) throw err;
-    const wrapped = new Error(`Gemini error: ${err.message}`);
-    wrapped.statusCode = 502;
-    throw wrapped;
   }
 }
 

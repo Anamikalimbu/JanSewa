@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { notificationService } from "../services/notificationService";
-import AIChatWidget from "../components/common/AIChatWidget";
 
 const iconPaths = {
   grid:        "M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z",
@@ -189,7 +188,6 @@ export default function AdminLayout({ children }) {
           {children}
         </main>
       </div>
-      <AIChatWidget />
     </div>
   );
 }
