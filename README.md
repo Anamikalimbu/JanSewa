@@ -26,7 +26,7 @@ Before you begin, ensure you have the following installed on your system:
 
 | Software | Version | Download |
 |----------|---------|----------|
-| **Node.js** | 16.x or higher | [nodejs.org](https://nodejs.org/) |
+| **Node.js** | 18.x or higher | [nodejs.org](https://nodejs.org/) |
 | **npm** | 8.x or higher | Comes with Node.js |
 | **Git** | Latest | [git-scm.com](https://git-scm.com/) |
 | **MongoDB** | 5.x or higher | [mongodb.com](https://www.mongodb.com/try/download/community) |
@@ -69,7 +69,7 @@ cd jansewa
 Check if Node.js and npm are properly installed:
 
 ```bash
-# Check Node.js version (should be 16.x or higher)
+# Check Node.js version (should be 18.x or higher)
 node --version
 
 # Check npm version (should be 8.x or higher)
@@ -172,11 +172,14 @@ SMTP_PASS=your-app-specific-password
 SMTP_FROM_EMAIL=noreply@jansewa.com
 
 # Frontend URL (for CORS)
-FRONTEND_URL=http://localhost:5173
+CLIENT_URL=http://localhost:5173
+# Optional comma-separated additional origins
+# ALLOWED_ORIGINS=http://localhost:3000
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
+RATE_LIMIT_MAX=200
+# CHAT_RATE_LIMIT_MAX=15
 ```
 
 #### Step 2: Client Environment Variables
@@ -216,6 +219,7 @@ npm run dev:client
 The application will be available at:
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:5000/api
+- **Health check**: http://localhost:5000/health
 
 #### Watch for Success Messages:
 
@@ -361,8 +365,9 @@ jansewa/
 |--------|----------|-------------|-----------------|
 | POST | `/auth/register` | Register a new user | ❌ No |
 | POST | `/auth/login` | Login user | ❌ No |
-| POST | `/auth/logout` | Logout user | ✅ Yes |
-| POST | `/auth/refresh` | Refresh JWT token | ✅ Yes |
+| GET | `/auth/me` | Get the current user | ✅ Yes |
+| POST | `/auth/forgot-password` | Request a password reset | ❌ No |
+| POST | `/auth/reset-password/:token` | Reset a password | ❌ No |
 
 ### User Routes
 
@@ -376,24 +381,26 @@ jansewa/
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|-----------------|
-| GET | `/complaints` | List all complaints | ✅ Yes |
+| GET | `/complaints/public` | Browse public complaints | ❌ No |
+| GET | `/complaints/meta/categories` | List complaint categories | ❌ No |
+| GET | `/complaints/stats` | Get public complaint statistics | ❌ No |
+| GET | `/complaints/mine` | List the current user's complaints | ✅ Yes |
+| GET | `/complaints` | List accessible complaints | ✅ Yes |
 | POST | `/complaints` | Create new complaint | ✅ Yes |
 | GET | `/complaints/:id` | Get complaint details | ✅ Yes |
-| PUT | `/complaints/:id` | Update complaint | ✅ Yes |
-| DELETE | `/complaints/:id` | Delete complaint | ✅ Yes |
 
 ### Department Routes
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|-----------------|
 | GET | `/departments` | List all departments | ❌ No |
-| GET | `/departments/:id` | Get department details | ❌ No |
+| GET | `/departments/:id` | Get department details | ✅ Yes |
 
 ### Admin Routes
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|-----------------|
-| GET | `/admin/dashboard` | Admin dashboard stats | ✅ Yes (Admin) |
+| GET | `/admin/dashboard/stats` | Admin dashboard statistics | ✅ Yes (Admin) |
 | GET | `/admin/users` | List all users | ✅ Yes (Admin) |
 | GET | `/admin/complaints` | List all complaints | ✅ Yes (Admin) |
 
@@ -402,13 +409,13 @@ jansewa/
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|-----------------|
 | GET | `/notifications` | Get user notifications | ✅ Yes |
-| POST | `/notifications/:id/read` | Mark as read | ✅ Yes |
+| PATCH | `/notifications/:id/read` | Mark as read | ✅ Yes |
 
 ### Chat Routes
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|-----------------|
-| POST | `/chat` | Send chat message to AI | ✅ Yes |
+| POST | `/chat/message` | Send chat message to AI | ✅ Yes |
 
 ---
 
@@ -423,7 +430,7 @@ JanSewa integrates **Google Gemini AI** for intelligent assistant features:
 - **Context-Aware Responses**: AI understands complaint context and user history
 
 ### Configuration:
-- **API**: Uses `@google/generative-ai` package (v0.24.1)
+- **API**: Uses `@google/genai`
 - **Model**: Google Generative AI (Gemini)
 - **Requires**: `GEMINI_API_KEY` environment variable
 
@@ -632,13 +639,13 @@ NODE_ENV=production npm start --prefix server
 
 | Technology | Version | Purpose |
 |-----------|---------|---------|
-| **Node.js** | 16+ | Runtime environment |
+| **Node.js** | 18+ | Runtime environment |
 | **Express** | 5.2.1 | Web framework |
 | **MongoDB** | 5.0+ | Database |
 | **Mongoose** | 9.7.4 | ODM for MongoDB |
 | **JWT** | 9.0.3 | Authentication |
 | **Bcryptjs** | 3.0.3 | Password hashing |
-| **Google Generative AI** | 0.24.1 | AI integration (Gemini) |
+| **Google GenAI SDK** | 2.21.0 | AI integration (Gemini) |
 | **Cloudinary** | 2.10.0 | Image hosting |
 | **Nodemailer** | 9.0.3 | Email service |
 | **Multer** | 2.2.0 | File uploads |
@@ -833,7 +840,7 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 5000).OwningProcess | Stop-Proc
 **Error:** `Access to XMLHttpRequest blocked by CORS policy`
 
 **Solutions:**
-1. Verify `FRONTEND_URL` in server `.env` matches frontend URL
+1. Verify `CLIENT_URL` in server `.env` matches frontend URL
 2. Check CORS middleware configuration in `server/src/app.js`
 3. Ensure backend is running on correct port
 
@@ -973,7 +980,7 @@ vercel
 
 ## ✅ Quick Start Checklist
 
-- [ ] Node.js (16+) and npm (8+) installed
+- [ ] Node.js (18+) and npm (8+) installed
 - [ ] Git installed
 - [ ] MongoDB installed or Atlas account created
 - [ ] Google Gemini API key obtained
@@ -1199,4 +1206,3 @@ NODE_ENV=production npm start --prefix server
    git commit -m "Feature: Description of changes"
    git push origin feature/your-feature-name
    ```
-   
