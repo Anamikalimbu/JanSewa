@@ -41,7 +41,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
-    const { data } = await api.post("/auth/login", credentials);
+    const payload = {
+      ...credentials,
+      email: credentials?.email ? String(credentials.email).trim().toLowerCase() : "",
+    };
+    const { data } = await api.post("/auth/login", payload);
     const { user: loggedInUser, token: authToken } = data.data || data;
     setUser(loggedInUser);
     setToken(authToken);
@@ -50,8 +54,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (payload) => {
-    const { data } = await api.post("/auth/register", payload);
+    const cleanPayload = {
+      ...payload,
+      email: payload?.email ? String(payload.email).trim().toLowerCase() : "",
+    };
+    const { data } = await api.post("/auth/register", cleanPayload);
     const { user: newUser, token: authToken } = data.data || data;
+
+    if (!authToken) {
+      return { pending: true, message: data.message };
+    }
+
     setUser(newUser);
     setToken(authToken);
     if (authToken) localStorage.setItem("token", authToken);
