@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { notificationService } from "../services/notificationService";
+import AIChatWidget from "../components/common/AIChatWidget";
 
 const iconPaths = {
   list:      "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
@@ -189,6 +190,7 @@ export default function DepartmentLayout({ children }) {
           {children}
         </main>
       </div>
+      <AIChatWidget />
     </div>
   );
 }

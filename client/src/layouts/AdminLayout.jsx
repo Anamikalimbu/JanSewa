@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { notificationService } from "../services/notificationService";
+import AIChatWidget from "../components/common/AIChatWidget";
 
 const iconPaths = {
   grid:        "M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z",
@@ -16,7 +17,8 @@ const iconPaths = {
   chevron:     "M6 9l6 6 6-6",
   user:        "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 11a4 4 0 100-8 4 4 0 000 8z",
   menu:        "M3 12h18M3 6h18M3 18h18",
-  close:       "M6 18L18 6M6 6l12 12"
+  close:       "M6 18L18 6M6 6l12 12",
+  clock:       "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 };
 
 const Icon = ({ d, size = 18, className = "", ...rest }) => (
@@ -32,6 +34,7 @@ const navItems = [
   { to: "/admin/complaints",  label: "Complaints",  icon: "list" },
   { to: "/admin/reports",     label: "Reports",     icon: "fileText" },
   { to: "/admin/analytics",   label: "Analytics",   icon: "barChart" },
+  { to: "/admin/pending",     label: "Pending Approvals", icon: "clock" },
   { to: "/admin/settings",    label: "Settings",    icon: "settings" },
 ];
 
@@ -186,6 +189,7 @@ export default function AdminLayout({ children }) {
           {children}
         </main>
       </div>
+      <AIChatWidget />
     </div>
   );
 }
