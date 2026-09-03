@@ -15,6 +15,7 @@ import ProfilePage from "../pages/Profile/ProfilePage";
 import SettingsPage from "../pages/Profile/SettingsPage";
 import AdminDashboardPage from "../pages/Admin/AdminDashboardPage";
 import AdminUsersPage from "../pages/Admin/AdminUsersPage";
+import AdminPendingUsersPage from "../pages/Admin/AdminPendingUsersPage";
 import AdminDepartmentsPage from "../pages/Admin/AdminDepartmentsPage";
 import AdminComplaintsPage from "../pages/Admin/AdminComplaintsPage";
 import AdminReportsPage from "../pages/Admin/AdminReportsPage";
@@ -25,6 +26,7 @@ import DepartmentDashboardPage from "../pages/Admin/Department/DepartmentDashboa
 import DepartmentAssignedPage from "../pages/Admin/Department/DepartmentAssignedPage";
 import DepartmentDepartmentsPage from "../pages/Admin/Department/DepartmentDepartmentsPage";
 import DepartmentReportsPage from "../pages/Admin/Department/DepartmentReportsPage";
+import ChatPage from "../pages/Chat/ChatPage";
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -36,6 +38,7 @@ const AppRouter = () => (
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       <Route path="/track" element={<TrackComplaintsPage />} />
+      <Route path="/chat" element={<ChatPage />} />
       <Route path="/complaints" element={<MyComplaintsPage />} />
       <Route path="/complaints/new" element={<SubmitComplaintPage />} />
       <Route path="/map" element={<ComplaintsMapPage />} />
@@ -45,6 +48,7 @@ const AppRouter = () => (
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/admin" element={<AdminDashboardPage />} />
       <Route path="/admin/users" element={<AdminUsersPage />} />
+      <Route path="/admin/pending" element={<AdminPendingUsersPage />} />
       <Route path="/admin/departments" element={<AdminDepartmentsPage />} />
       <Route path="/admin/complaints" element={<AdminComplaintsPage />} />
       <Route path="/admin/reports" element={<AdminReportsPage />} />
