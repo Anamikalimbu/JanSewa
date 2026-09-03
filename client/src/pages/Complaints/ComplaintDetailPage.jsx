@@ -256,39 +256,83 @@ export default function ComplaintDetailPage() {
         </div>
       )}
 
-      {/* Comments */}
-      <div id="comments" style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 14 }}>{t("detail_comments")}</div>
-
-        {complaint.comments?.length ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
-            {complaint.comments.map((c, i) => (
-              <div key={i} style={{ borderBottom: "1px solid var(--border)", paddingBottom: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
-                  <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{c.authorName}</span>
-                  <span style={{ color: "var(--text-muted)" }}>{formatDateTime(c.createdAt)}</span>
-                </div>
-                <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>{c.message}</div>
-              </div>
-            ))}
+      {/* Real-time Style Complaint Discussion Chat */}
+      <div id="comments" style={{
+        background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14,
+        padding: 20, boxShadow: "0 2px 12px rgba(15,23,42,0.04)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, borderBottom: "1px solid var(--border)", paddingBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 18 }}>💬</span>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>
+              Complaint Discussion &amp; Updates Chat
+            </div>
           </div>
-        ) : (
-          <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>{t("detail_noComments")}</div>
-        )}
+          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", background: "var(--background)", padding: "3px 10px", borderRadius: 12 }}>
+            {complaint.comments?.length || 0} messages
+          </span>
+        </div>
+
+        <div style={{
+          maxHeight: 380, overflowY: "auto", display: "flex", flexDirection: "column",
+          gap: 12, marginBottom: 16, paddingRight: 4,
+        }}>
+          {complaint.comments?.length ? (
+            complaint.comments.map((c, i) => (
+              <div
+                key={i}
+                style={{
+                  background: "var(--background)", border: "1px solid var(--border)",
+                  borderRadius: 12, padding: "10px 14px", display: "flex", flexDirection: "column", gap: 4,
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{
+                      width: 22, height: 22, borderRadius: "50%", background: "var(--primary)",
+                      color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center"
+                    }}>
+                      {(c.authorName || "U")[0].toUpperCase()}
+                    </div>
+                    <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{c.authorName || "User"}</span>
+                  </div>
+                  <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{formatDateTime(c.createdAt)}</span>
+                </div>
+                <div style={{ fontSize: 13.5, color: "var(--text-primary)", lineHeight: 1.5, marginLeft: 28, whiteSpace: "pre-line" }}>
+                  {c.message}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div style={{
+              textAlign: "center", padding: "30px 10px", background: "var(--background)",
+              borderRadius: 12, border: "1px dashed var(--border)", color: "var(--text-muted)", fontSize: 13,
+            }}>
+              💬 No messages yet. Start a discussion with the department officer below!
+            </div>
+          )}
+        </div>
 
         <form onSubmit={handleAddComment} style={{ display: "flex", gap: 10 }}>
           <input
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder={t("detail_commentPlaceholder")}
-            style={{ flex: 1, padding: "10px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13 }}
+            placeholder="Type a message or response about this complaint..."
+            style={{
+              flex: 1, padding: "11px 14px", borderRadius: 10, border: "1px solid var(--border)",
+              fontSize: 13.5, background: "var(--background)", color: "var(--text-primary)", outline: "none"
+            }}
           />
           <button
             type="submit"
             disabled={posting || !commentText.trim()}
-            style={{ padding: "10px 18px", borderRadius: 8, border: "none", background: "var(--primary)", color: "#fff", fontWeight: 600, fontSize: 13, cursor: "pointer", opacity: posting ? 0.7 : 1 }}
+            style={{
+              padding: "11px 20px", borderRadius: 10, border: "none", background: "var(--primary)",
+              color: "#fff", fontWeight: 600, fontSize: 13.5, cursor: posting || !commentText.trim() ? "not-allowed" : "pointer",
+              opacity: posting || !commentText.trim() ? 0.6 : 1, boxShadow: "0 2px 8px rgba(0,128,128,0.25)"
+            }}
           >
-            {t("detail_postComment")}
+            {posting ? "Sending..." : "Send Message"}
           </button>
         </form>
       </div>

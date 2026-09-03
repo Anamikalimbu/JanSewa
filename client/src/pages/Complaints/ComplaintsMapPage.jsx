@@ -6,9 +6,9 @@ import { useLanguage } from "../../context/LanguageContext";
 import { mapService } from "../../services/mapService";
 import { complaintService } from "../../services/complaintService";
 
-// Default center: Itahari, Koshi Province, Nepal (matches the platform's
-// primary service area). Falls back gracefully if no points are found there.
-const DEFAULT_CENTER = [26.6650, 87.2750];
+// Default center: Dharan, Sunsari, Koshi Province, Nepal (matches
+// the platform's primary service area). Falls back gracefully if no points are found there.
+const DEFAULT_CENTER = [26.8129, 87.2836];
 const DEFAULT_ZOOM = 13;
 
 const STATUS_COLORS = {
@@ -156,20 +156,12 @@ export default function ComplaintsMapPage() {
           borderRadius: 14, overflow: "hidden", border: "1px solid var(--border)",
           height: 520, background: "var(--card)", position: "relative",
         }}>
-          {!loading && points.length === 0 ? (
-            <div style={{
-              height: "100%", display: "flex", alignItems: "center", justifyContent: "center",
-              color: "var(--text-muted)", fontSize: 13, textAlign: "center", padding: 24,
-            }}>
-              {error || t("map_noPoints")}
-            </div>
-          ) : (
-            <MapContainer center={center} zoom={DEFAULT_ZOOM} style={{ height: "100%", width: "100%" }} scrollWheelZoom>
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {points.map((p) => (
+          <MapContainer center={center} zoom={DEFAULT_ZOOM} style={{ height: "100%", width: "100%" }} scrollWheelZoom>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {points.map((p) => (
                 <CircleMarker
                   key={p.id}
                   center={[p.lat, p.lng]}
@@ -202,8 +194,16 @@ export default function ComplaintsMapPage() {
                     </div>
                   </Popup>
                 </CircleMarker>
-              ))}
-            </MapContainer>
+            ))}
+          </MapContainer>
+          {!loading && points.length === 0 && (
+            <div style={{
+              position: "absolute", left: 16, right: 16, bottom: 16, zIndex: 1000,
+              color: "var(--text-muted)", fontSize: 13, textAlign: "center", padding: "10px 14px",
+              background: "rgba(255,255,255,0.92)", border: "1px solid var(--border)", borderRadius: 8,
+            }}>
+              {error || t("map_noPoints")}
+            </div>
           )}
         </div>
 
