@@ -9,6 +9,7 @@ const fs = require("fs");
 const Complaint = require("../models/Complaint");
 const Department = require("../models/Department");
 const Notification = require("../models/Notification");
+const dispatchNotification = require("../utils/notificationDispatcher");
 const CATEGORY_META = require("../constants/categoryMeta");
 const { COMPLAINT_STATUSES, NOTIFICATION_TYPES } = require("../constants");
 
@@ -362,11 +363,11 @@ router.post(
       statusHistory: [{ status: COMPLAINT_STATUSES.PENDING, note: "Complaint submitted." }],
     });
 
-    await Notification.create({
-      userId: req.user._id,
-      message: `Your complaint "${complaint.title}" has been submitted and is pending review.`,
+    await dispatchNotification({
+      recipient: req.user,
       type: NOTIFICATION_TYPES.COMPLAINT_CREATED,
-      complaintId: complaint._id,
+      message: `Your complaint "${complaint.title}" has been submitted and is pending review.`,
+      complaint,
     });
 
     sendSuccess(res, 201, "Complaint submitted successfully.", {
@@ -430,6 +431,17 @@ router.post(
     });
     await complaint.save();
 
+    // If an officer/admin replies, notify the citizen who submitted the complaint
+    if (String(complaint.userId) !== String(req.user._id)) {
+      await dispatchNotification({
+        recipient: complaint.userId,
+        type: NOTIFICATION_TYPES.STATUS_UPDATED,
+        message: `${req.user.name} replied to your complaint "${complaint.title}".`,
+        complaint,
+        extraNote: message.trim(),
+      });
+    }
+
     sendSuccess(res, 201, "Comment added.", { comments: complaint.comments });
   })
 );
@@ -487,11 +499,12 @@ router.patch(
     complaint.statusHistory.push({ status, note: note || "" });
     await complaint.save();
 
-    await Notification.create({
-      userId: complaint.userId,
-      message: `Your complaint "${complaint.title}" is now marked as ${status}.`,
+    await dispatchNotification({
+      recipient: complaint.userId,
       type: NOTIFICATION_TYPES.STATUS_UPDATED,
-      complaintId: complaint._id,
+      message: `Your complaint "${complaint.title}" status is now marked as ${status}.`,
+      complaint,
+      extraNote: note || "",
     });
 
     sendSuccess(res, 200, "Complaint status updated.", { complaint });
@@ -536,6 +549,16 @@ router.patch(
 
     await complaint.save();
     const populated = await complaint.populate("departmentId", "departmentName");
+
+    if (departmentId) {
+      const deptName = populated.departmentId?.departmentName || "department";
+      await dispatchNotification({
+        recipient: complaint.userId,
+        type: NOTIFICATION_TYPES.COMPLAINT_ASSIGNED,
+        message: `Your complaint "${complaint.title}" has been assigned to ${deptName}.`,
+        complaint: populated,
+      });
+    }
 
     sendSuccess(res, 200, "Department assignment updated.", {
       complaint: { ...toListItem(populated) },

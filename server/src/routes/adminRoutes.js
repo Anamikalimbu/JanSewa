@@ -1,6 +1,8 @@
 const express = require("express");
 const asyncHandler = require("../utils/asyncHandler");
 const { sendSuccess } = require("../utils/apiResponse");
+const AppError = require("../utils/AppError");
+const sendEmail = require("../utils/sendEmail");
 const { protect, authorize } = require("../middleware/auth");
 const User = require("../models/User");
 const Complaint = require("../models/Complaint");
@@ -113,6 +115,94 @@ router.get(
     const breakdown = statuses.map((status) => ({ status, count: countByStatus[status] || 0 }));
 
     sendSuccess(res, 200, "Status breakdown fetched", { breakdown });
+  })
+);
+
+/**
+ * GET /api/admin/pending-users
+ * List all users with accountStatus: "pending"
+ */
+router.get(
+  "/pending-users",
+  asyncHandler(async (req, res) => {
+    const users = await User.find({
+      accountStatus: "pending",
+      role: { $in: [ROLES.DEPARTMENT, ROLES.ADMIN] },
+    })
+      .populate("departmentId", "departmentName")
+      .sort({ createdAt: -1 });
+    sendSuccess(res, 200, "Pending users fetched", { users });
+  })
+);
+
+/**
+ * PATCH /api/admin/pending-users/:id/approve
+ */
+router.patch(
+  "/pending-users/:id/approve",
+  asyncHandler(async (req, res) => {
+    if (req.params.id === req.user.id) {
+      throw new AppError("You cannot approve your own account.", 400);
+    }
+    
+    const user = await User.findOne({ _id: req.params.id, accountStatus: "pending" });
+    if (!user) {
+      throw new AppError("User not found or not in pending status.", 400);
+    }
+
+    user.accountStatus = "approved";
+    user.approvedBy = req.user._id;
+    user.approvedAt = Date.now();
+    await user.save({ validateBeforeSave: false }); // Skip email validation just in case
+
+    const loginUrl = `${process.env.CLIENT_URL || "http://localhost:3000"}/login`;
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "JanSewa Account Approved",
+        html: `<p>Hi ${user.name},</p><p>Your account request has been approved. You can now log in.</p><p><a href="${loginUrl}">${loginUrl}</a></p>`,
+      });
+    } catch (emailError) {
+      console.error(`Approval email failed for ${user.email}:`, emailError.message);
+    }
+
+    sendSuccess(res, 200, "User approved successfully.", { user });
+  })
+);
+
+/**
+ * PATCH /api/admin/pending-users/:id/reject
+ */
+router.patch(
+  "/pending-users/:id/reject",
+  asyncHandler(async (req, res) => {
+    if (req.params.id === req.user.id) {
+      throw new AppError("You cannot reject your own account.", 400);
+    }
+    
+    const user = await User.findOne({ _id: req.params.id, accountStatus: "pending" });
+    if (!user) {
+      throw new AppError("User not found or not in pending status.", 400);
+    }
+
+    user.accountStatus = "rejected";
+    user.approvedBy = req.user._id;
+    user.approvedAt = Date.now();
+    await user.save({ validateBeforeSave: false });
+
+    const reason = req.body.reason ? `<p>Reason: ${req.body.reason}</p>` : "";
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "JanSewa Account Request Update",
+        html: `<p>Hi ${user.name},</p><p>Your account request was not approved.</p>${reason}<p>Contact the administrator for more details.</p>`,
+      });
+    } catch (emailError) {
+      console.error(`Rejection email failed for ${user.email}:`, emailError.message);
+    }
+
+    sendSuccess(res, 200, "User rejected successfully.", { user });
   })
 );
 

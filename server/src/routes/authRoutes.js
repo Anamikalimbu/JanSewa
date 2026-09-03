@@ -27,19 +27,18 @@ router.post(
       throw new AppError("Name, email and password are required.", 400);
     }
 
-    const existing = await User.findOne({ email: email.toLowerCase() });
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanPassword = String(password);
+
+    const existing = await User.findOne({ email: cleanEmail });
     if (existing) {
       throw new AppError("An account with this email already exists.", 409);
     }
 
-    // Admin is not a self-service role for just anyone with a matching
-    // email — it only exists so the reserved pattern below can be
-    // registered once by whoever holds that address. Anything that isn't
-    // "department" falls back to "citizen" as before.
     let requestedRole = role === ROLES.DEPARTMENT ? ROLES.DEPARTMENT : ROLES.CITIZEN;
 
     if (role === ROLES.ADMIN) {
-      if (!ADMIN_EMAIL_REGEX.test(email.toLowerCase())) {
+      if (!ADMIN_EMAIL_REGEX.test(cleanEmail)) {
         throw new AppError(
           "Admin registration requires a reserved admin email in the format admin.<name>@jansewa.gov.np",
           403
@@ -52,14 +51,21 @@ router.post(
       throw new AppError("Please select which department you work for.", 400);
     }
 
+    const isApprovalRequired = requestedRole === ROLES.DEPARTMENT || requestedRole === ROLES.ADMIN;
+
     const user = await User.create({
-      name,
-      email,
-      phone,
-      password,
+      name: String(name).trim(),
+      email: cleanEmail,
+      phone: phone ? String(phone).trim() : undefined,
+      password: cleanPassword,
       role: requestedRole,
       departmentId: requestedRole === ROLES.DEPARTMENT ? departmentId : null,
+      accountStatus: isApprovalRequired ? "pending" : "approved",
     });
+
+    if (isApprovalRequired) {
+      return sendSuccess(res, 201, "Your account request has been submitted and is awaiting admin approval.");
+    }
 
     const token = user.generateAuthToken();
 
@@ -82,20 +88,26 @@ router.post(
       throw new AppError("Email and password are required.", 400);
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() })
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanPassword = String(password);
+
+    const user = await User.findOne({ email: cleanEmail })
       .select("+password")
       .populate("departmentId", "departmentName");
 
-    if (!user || !(await user.comparePassword(password))) {
+    if (!user || !(await user.comparePassword(cleanPassword))) {
       throw new AppError("Invalid email or password.", 401);
+    }
+    if (user.accountStatus === "pending") {
+      throw new AppError("Your account is awaiting approval from an administrator.", 403);
+    }
+    if (user.accountStatus === "rejected") {
+      throw new AppError("Your account request was not approved. Contact the administrator for details.", 403);
     }
     if (!user.isActive) {
       throw new AppError("This account has been deactivated.", 403);
     }
     if (user.role === ROLES.ADMIN && !ADMIN_EMAIL_REGEX.test(user.email)) {
-      // Belt-and-braces: an admin row should never exist with a
-      // non-conforming email, but if one ever does (bad data, manual
-      // DB edit), refuse to log it in as admin instead of trusting it.
       throw new AppError("This admin account is invalid. Contact the system owner.", 403);
     }
 
