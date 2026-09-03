@@ -34,6 +34,7 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 const limiter = rateLimit({
   windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
   max: Number(process.env.RATE_LIMIT_MAX) || 200,
+  skip: () => process.env.NODE_ENV !== "production",
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: "Too many requests. Please try again later." },
@@ -51,6 +52,7 @@ const allowedOrigins = new Set(
     process.env.CLIENT_URL,
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [])
   ].filter(Boolean)
 );
 
