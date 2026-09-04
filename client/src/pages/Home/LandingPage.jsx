@@ -189,7 +189,7 @@ const team = [
     initials: "DB", key: "divya",
     bg: "rgba(255,193,7,0.15)", color: "#a07000",
     github: "https://github.com/Divya-Bhandari", linkedin: "https://www.linkedin.com/in/divya-bhandari-24a2323b9/",
-    portfolio: null,
+    portfolio: "https://portfoliodivyabhandari.netlify.app/",
   },
 ];
 
