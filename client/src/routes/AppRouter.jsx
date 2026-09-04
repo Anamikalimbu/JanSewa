@@ -26,6 +26,9 @@ import DepartmentDashboardPage from "../pages/Admin/Department/DepartmentDashboa
 import DepartmentAssignedPage from "../pages/Admin/Department/DepartmentAssignedPage";
 import DepartmentDepartmentsPage from "../pages/Admin/Department/DepartmentDepartmentsPage";
 import DepartmentReportsPage from "../pages/Admin/Department/DepartmentReportsPage";
+import DepartmentProfilePage from "../pages/Admin/Department/DepartmentProfilePage";
+import DepartmentSettingsPage from "../pages/Admin/Department/DepartmentSettingsPage";
+
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -57,9 +60,12 @@ const AppRouter = () => (
       <Route path="/department/assigned" element={<DepartmentAssignedPage />} />
       <Route path="/department/departments" element={<DepartmentDepartmentsPage />} />
       <Route path="/department/reports" element={<DepartmentReportsPage />} />
+      <Route path="/department/profile" element={<DepartmentProfilePage />} />
+      <Route path="/department/settings" element={<DepartmentSettingsPage />} />
       {/* Routes will be added here each week */}
     </Routes>
   </BrowserRouter>
 );
+
 
 export default AppRouter;

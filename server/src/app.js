@@ -50,7 +50,10 @@ const allowedOrigins = new Set(
   [
     process.env.CLIENT_URL,
     "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:5173",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
     ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [])
   ].filter(Boolean)
 );
